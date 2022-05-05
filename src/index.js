@@ -19,7 +19,7 @@ let frameCounter = 0,
 let timeStamp = Date.now();
 
 const mesh = new Mesh(screenBuffer, zBuffer);
-const { min, max } = await mesh.load("/teapot.obj");
+const { min, max } = await mesh.load("/cessna.obj");
 
 let xrot = 0.3;
 mesh.setLocalRotation(20, 0, 0);
