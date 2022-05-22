@@ -12,11 +12,12 @@ export default class Mesh {
 
     this.indices = [];
     this.triangles = [];
-    this.vertexnormals = [];
+    this.localVertexnormals = [];
+    this.worldVertexnormals = [];
     this.texturecoords = [];
 
     this.coordinates = []; // raw/imported coordinates
-    this.localCoordinates = []; // raw/imported coordinates after local transform is applied
+    this.localCoordinates = []; // raw/imported coordinates after local transform
     this.worldCoordinates = [];
     this.cameraCoordinates = [];
     this.projectedCoordinates = [];
@@ -24,8 +25,11 @@ export default class Mesh {
     this.screenCoordinates = [];
   }
 
-  async load(fileName) {
-    const obj = await this.parseOBJ(fileName);
+  load(objData) {
+    const obj = this.parseOBJ(objData);
+
+    console.log("Vertices:", obj.vertices.length);
+    console.log("Triangles:", obj.vertexindices.length);
 
     this.coordinates = obj.vertices.map((v) => new Vector(v[0], v[1], v[2]));
 
@@ -38,9 +42,8 @@ export default class Mesh {
         const b = this.coordinates[i[1]];
         const c = this.coordinates[i[2]];
 
-        // get a *not normalized* vector, thus the vector length reflects the triangle area
-        // this is used to weigh the face normals around a vertex according to the corresponding
-        // triangle area
+        // get a *non-normalized* normal vector, thus the vector length reflects the triangle area
+        // this is used to weigh the face normals around a vertex - using the corresponding triangle's area
         const faceNormal = this.getNormal(a, b, c);
 
         // assign the face normal to this indices triple - ie this triangle
@@ -48,7 +51,7 @@ export default class Mesh {
         return faceNormal;
       });
 
-      // create array of null normals (0,0,0) for each vertex
+      // initialize array of vertex normals with empty (0,0,0) values
       const generatedVertexNormals = Array.from({ length: this.coordinates.length }, (v) => new Vector());
 
       obj.vertexindices.forEach((i, n) => {
@@ -60,14 +63,16 @@ export default class Mesh {
         generatedVertexNormals[i[2]].add(faceNormal);
       });
 
-      // normalize the sum of the (weighed) face vectors
-      vertexNormals.forEach((n) => n.normalize());
+      this.localVertexnormals = generatedVertexNormals;
 
-      this.vertexnormals = generatedVertexNormals;
+      // normalize the sum of the (weighed) face vectors
+      this.localVertexnormals.forEach((n) => n.normalize());
+
+      // vertices and normals are indexed equally, so just copy index array
       obj.normalindices = obj.vertexindices.slice();
     } else {
       // the object had normals, use them
-      this.vertexnormals = obj.vertexnormals.map((v) => new Vector(v[0], v[1], v[2]));
+      this.localVertexnormals = obj.vertexnormals.map((v) => new Vector(v[0], v[1], v[2]));
     }
 
     const defaultColor = new Vector(250, 250, 250);
@@ -82,11 +87,14 @@ export default class Mesh {
     this.clipCoordinates = Array.from({ length: this.coordinates.length }, (v) => new Vector());
     this.screenCoordinates = Array.from({ length: this.coordinates.length }, (v) => new Vector());
 
+    this.worldVertexnormals = Array.from({ length: this.coordinates.length }, (v) => new Vector());
+
     // run one local transform so local coordinate array is populated
     for (let i = 0; i < this.coordinates.length; i++) {
       this.localTransform.transform(this.coordinates[i], this.localCoordinates[i]);
     }
 
+    // calculate and return bounding box
     const min = new Vector();
     const max = new Vector();
     min[0] = Infinity;
@@ -119,16 +127,14 @@ export default class Mesh {
     return normal;
   }
 
-  async parseOBJ(fileName) {
+  parseOBJ(objData) {
     const vertices = [];
     const texturecoords = [];
     const vertexnormals = [];
     const vertexindices = [];
     const textureindices = [];
     const normalindices = [];
-    const response = await fetch(fileName);
-    const text = await response.text();
-    text.split(/\r?\n/).forEach((line) => {
+    objData.split(/\r?\n/).forEach((line) => {
       const lineTokens = line.split(" ");
       switch (lineTokens[0]) {
         case "v":
@@ -169,6 +175,7 @@ export default class Mesh {
   }
 
   project(camera) {
+    // transform vertices
     for (let i = 0; i < this.coordinates.length; i++) {
       this.localTransform.transform(this.coordinates[i], this.localCoordinates[i]);
     }
@@ -195,18 +202,25 @@ export default class Mesh {
     for (let i = 0; i < this.clipCoordinates.length; i++) {
       this.clipCoordinates[i].toScreenSpace(camera.screenWidth / 2, camera.screenHeight / 2, this.screenCoordinates[i]);
     }
+
+    // also transform normals, using local transform (for now)
+    // TODO: calculate total transform (local * world) and apply that to the normals
+    for (let i = 0; i < this.localVertexnormals.length; i++) {
+      this.localTransform.transform(this.localVertexnormals[i], this.worldVertexnormals[i]);
+    }
   }
 
   render() {
     this.sort();
     this.triangles.forEach((t) =>
-      t.draw(this.screenCoordinates, this.vertexnormals, this.texturecoords, this.screenBuffer, this.zBuffer)
+      t.draw(this.screenCoordinates, this.worldVertexnormals, this.texturecoords, this.screenBuffer, this.zBuffer)
     );
   }
 
   // insertion sort the triangles so we draw them front to back
-  // the z-buffer handles visibility, but we would still like to minimize overdraw
-  // (doing shading calculation for a pixel that is later overdrawn by another, nearer pixel)
+  // the z-buffer handles visibility, but we would still like to avoid
+  // drawing (and shading) the same pixel twice (ie drawing a pixel that
+  // is later overdrawn by another, nearer pixel)
   //
   // insertion sort is chosen since it is fast on nearly sorted arrays,
   // which we will have here due to frame coherence

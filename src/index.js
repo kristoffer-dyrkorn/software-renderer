@@ -19,30 +19,33 @@ let frameCounter = 0,
 let timeStamp = Date.now();
 
 const mesh = new Mesh(screenBuffer, zBuffer);
-const { min, max } = await mesh.load("/cessna.obj");
-
-let xrot = 0.3;
 mesh.setLocalRotation(20, 0, 0);
 
-const center = new Vector(min);
-center.add(max);
-center.scale(0.5);
+let xrot = 0.3;
+let camera;
 
-const extents = new Vector(max);
-extents.sub(center);
-const radius = extents.length();
+async function setupModelAndCamera(objData) {
+  const { min, max } = mesh.load(objData);
 
-const fov = 60;
+  const center = new Vector(min);
+  center.add(max);
+  center.scale(0.5);
 
-const cameraPos = new Vector(0, 0, 2 * radius);
+  const extents = new Vector(max);
+  extents.sub(center);
+  const radius = extents.length();
 
-const near = cameraPos[2] - max[2];
-const far = cameraPos[2] - min[2];
+  const cameraPos = new Vector(0, 0, 2 * radius);
 
-const camera = new Camera(fov, near, far, canvas);
-camera.setPosition(cameraPos);
+  const near = cameraPos[2] - max[2];
+  const far = cameraPos[2] - min[2];
 
-resize();
+  camera = new Camera(60, near, far, canvas);
+  camera.setPosition(cameraPos);
+
+  resize();
+  draw();
+}
 
 function draw() {
   requestAnimationFrame(draw);
@@ -84,6 +87,23 @@ function resize() {
   canvas.style.height = window.innerHeight + "px";
 
   camera.setViewPort(canvas);
+}
 
-  draw();
+document.getElementById("dropzone").addEventListener("drop", dropHandler, false);
+document.getElementById("dropzone").addEventListener("dragover", dragOverHandler, false);
+
+function dropHandler(e) {
+  e.preventDefault();
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => setupModelAndCamera(reader.result), false);
+
+  const file = e.dataTransfer.items[0].getAsFile();
+  reader.readAsText(file);
+
+  return false;
+}
+
+function dragOverHandler(e) {
+  e.preventDefault();
 }
