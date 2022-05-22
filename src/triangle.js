@@ -66,15 +66,19 @@ export default class Triangle {
     // pre-store 1/determinant, to later replace divides by multiplication
     const invDeterminant = 1 / determinant;
 
-    // create bounding box (on integer coordinates) around triangle
-    const xmin = Math.trunc(Math.min(va[0], vb[0], vc[0]));
-    const xmax = Math.ceil(Math.max(va[0], vb[0], vc[0]));
-    const ymin = Math.trunc(Math.min(va[1], vb[1], vc[1]));
-    const ymax = Math.ceil(Math.max(va[1], vb[1], vc[1]));
+    // create bounding box around triangle, expanding area out to integer coordinates
+    let xmin = Math.trunc(Math.min(va[0], vb[0], vc[0]));
+    let xmax = Math.ceil(Math.max(va[0], vb[0], vc[0]));
+    let ymin = Math.trunc(Math.min(va[1], vb[1], vc[1]));
+    let ymax = Math.ceil(Math.max(va[1], vb[1], vc[1]));
 
-    // TODO: clipping against viewport (clamp xmin xmax ymin ymax)
+    // clip bounding box against viewport
+    xmin = Math.max(xmin, 0);
+    xmax = Math.min(xmax, screenBuffer.width);
+    ymin = Math.max(ymin, 0);
+    ymax = Math.min(ymax, screenBuffer.height);
 
-    // do distance function sampling on pixel centers
+    // do distance function sampling on pixel centers, not pixel corners
     const p = new Vector(xmin + 0.5, ymin + 0.5, 0);
 
     // set up distance functions (interpolation weights) along the left edge of the bounding rectangle.
@@ -95,13 +99,15 @@ export default class Triangle {
 
     // trick: after perspective transform, the z distance from camera to vertex
     // is stored in the w coordinate. (The clip space and screen space transforms don't change it.)
-    // the sign reversal converts from a distance to a z coordinate (ie relative to camera in origo)
+    // the sign reversal converts from a distance to a z coordinate (since the camera is placed in origo)
 
-    // compute inverse z coordinates for each vertex - since 1/z is linear
-    // this gives perspective correct interpolation
+    // compute inverse z coordinates for each vertex, do linear interpolation using those values,
+    // and compute inverse again when actual value is needed.
+    // this gives perspective correct interpolation since 1/z is linear
     const zInverted = new Vector(1 / -va[3], 1 / -vb[3], 1 / -vc[3]);
-    // pre-multiply by interpolation normalization factor, so the multiply (one per pixel)
-    // is not needed at the interpolation stage
+
+    // pre-multiply by the normalization factor for interpolation weights, so that
+    // this multiply is not needed when calculating actual values (would cost one multiply per pixel)
     zInverted.scale(invDeterminant);
 
     // use projected Z, range 1 (near plane) to 0 (far plane, at infinity)) for z buffer calculations
@@ -176,9 +182,10 @@ export default class Triangle {
               // first: reset the base color - it was rescaled in the previous run
               this.pixelColor.copy(this.color);
 
-              // since we normalize the normal vector before using it we can skip the otherwise needed
-              // scaling of each component by z value. thus, only the sign of z matters, which
-              // here always will be negative since camera looks down negative z from origo
+              // since we normalize the normal vector before using it in the lighting calcutaion
+              // we can skip the otherwise needed scaling of each component by z value.
+              // thus, only the sign of z matters, which here always will be negative
+              // since camera looks down negative z from origo
               this.n[0] = -nxDivZ.dot(this.w);
               this.n[1] = -nyDivZ.dot(this.w);
               this.n[2] = -nzDivZ.dot(this.w);

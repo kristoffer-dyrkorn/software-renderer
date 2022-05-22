@@ -1,15 +1,37 @@
 # software-renderer
-A software renderer that displays OBJ files in your browser. No GPU needed, everything is CPU based.
 
-# why?
-To explore how a rendering pipeline - and, especially, a modern rasterizer - looks like.
+A pure software renderer that displays OBJ files in your browser. Completely self-contained, has no dependencies. All computations run on the CPU.
 
-# features
-Supports flat, Gouraud and Phong shading. Perspective correct texture mapping is almost done.
-The code is somewhat optimized - there are still many tricks on the TODO list.
+## Example output
 
-# running
-Go to the root directory of the project and start a web server, such as `python3 -m http.server`. Open a browser, go to `http://localhost:8000/src` and you should se a 3D object spinning in your browser.
+![](https://github.com/kristoffer-dyrkorn/software-renderer/blob/main/images/cessna.jpg)
 
-# license
+## Why?
+
+To explore how a rendering pipeline - and, especially, a modern rasterizer - looks like. Also, an experiment on how fast a CPU-based renderer can become.
+
+## Features
+
+This is implemented now:
+
+- drag and drop OBJ files to render them
+- full transform pipeline
+- will generate vertex normals if not present in the OBJ
+- backface culling
+- z buffering, optimized for numerical precision
+- flat, Gouraud and Phong shading
+- simple viewport clipping
+- reasonably optimized code
+
+To come:
+
+- perspective correct texture mapping (almost done)
+- even more optimized code
+
+## Running
+
+Go to the root directory of the project and start a web server, such as `python3 -m http.server`. Open a browser, go to `http://localhost:8000/src`. Drag and drop an OBJ file onto the browser window and you should se a 3D object spinning in your browser.
+
+## License
+
 MIT.

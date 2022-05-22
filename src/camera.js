@@ -13,7 +13,6 @@ export default class Camera {
     this.viewMatrix = new Matrix(); // location and orientation of the camera
     this.cameraMatrix = new Matrix(); // inverse view matrix, aka camera matrix
     this.projectionMatrix = new Matrix(); // perspective projection & screen aspect ratios
-    this.transformMatrix = new Matrix(); // final transform: premultiplied projection matrix and inverse view matrix
 
     this.viewIsChanged = true;
     this.projectionIsChanged = true;
@@ -59,9 +58,12 @@ export default class Camera {
   }
 
   updateProjectionMatrix() {
-    // set up a projection matrix where the far plane (here: infinity) maps to 0
-    // and the near plane maps to 1
+    // set up a projection matrix where the projected z coordinate range goes from
+    // 1 (z value at near plane) to 0 (z value at far plane, placed at infinity)).
+    // the values are chosen to maximise numerical precision, see
+    // https://developer.nvidia.com/content/depth-precision-visualized
     // https://dev.theomader.com/depth-precision/
+
     const aspect = this.screenWidth / this.screenHeight;
     const f = 1.0 / Math.tan((this.fovy * DEGREES_TO_RADIANS) / 2);
     this.projectionMatrix[0] = f / aspect;

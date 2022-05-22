@@ -43,6 +43,8 @@ async function setupModelAndCamera(objData) {
   camera = new Camera(60, near, far, canvas);
   camera.setPosition(cameraPos);
 
+  window.addEventListener("resize", resize);
+
   resize();
   draw();
 }
@@ -76,8 +78,6 @@ function draw() {
 
   ctx.putImageData(screenBuffer, 0, 0);
 }
-
-window.addEventListener("resize", resize);
 
 function resize() {
   canvas.width = window.innerWidth * window.devicePixelRatio;
