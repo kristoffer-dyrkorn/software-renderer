@@ -1,6 +1,6 @@
 # software-renderer
 
-A pure software renderer that displays OBJ files in your browser. Completely self-contained, has no dependencies. All computations run on the CPU.
+A pure software renderer that displays OBJ files in your browser. Completely self-contained, has no dependencies. All code runs on the CPU and draws pixels to a buffer that is copied onto a canvas element.
 
 ## Example output
 
@@ -8,18 +8,18 @@ A pure software renderer that displays OBJ files in your browser. Completely sel
 
 ## Why?
 
-To explore how a rendering pipeline - and, especially, a modern rasterizer - looks like. Also, an experiment on how fast a CPU-based renderer can become.
+To explore how a rendering pipeline - and, especially, a rasterizer - looks like. Also, an experiment on how fast a CPU-based renderer can become.
 
 ## Features
 
 This is implemented now:
 
-- drag and drop OBJ files to render them
-- full transform pipeline
-- will generate vertex normals if not present in the OBJ
+- dragging and dropping of OBJ files to open and render them
+- full transform pipeline (local, world, camera, clip and screen spaces)
+- creation of vertex normals (if not present in the OBJ)
 - backface culling
 - z buffering, optimized for numerical precision
-- flat, Gouraud and Phong shading
+- flat, Gouraud and Lambert shading
 - simple viewport clipping
 - reasonably optimized code
 
