@@ -12,14 +12,17 @@ To explore how a rendering pipeline - and, especially, a rasterizer - looks like
 
 ## Features
 
-This is implemented now:
+Currently implemented:
 
 - dragging and dropping of OBJ files to open and render them
 - full transform pipeline (local, world, camera, clip and screen spaces)
-- creation of vertex normals (if not present in the OBJ)
+- automatic creation of vertex normals (if not already present in the OBJ)
 - backface culling
-- z buffering, optimized for numerical precision
-- flat, Gouraud and Lambert shading
+- z buffering, optimized to retain numerical precision
+- front-to-back polygon rendering, to minimize pixel overdraw
+- flat shading (single color polygons)
+- Gouraud shading (per vertex shading & interpolation of pixel colors)
+- Lambert shading (interpolation of vertex normals & per pixel shading)
 - simple viewport clipping
 - reasonably optimized code
 
