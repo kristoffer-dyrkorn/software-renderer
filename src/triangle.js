@@ -1,3 +1,4 @@
+import Mesh from "./mesh.js";
 import Vector from "./vector.js";
 
 export default class Triangle {
@@ -6,18 +7,13 @@ export default class Triangle {
     this.vb = vertexIndices[1];
     this.vc = vertexIndices[2];
 
-    this.isTextured = false;
-    this.smoothShading = true;
-
     this.na = normalIndices[0];
     this.nb = normalIndices[1];
     this.nc = normalIndices[2];
 
-    if (textureIndices && textureIndices.length > 0) {
-      this.isTextured = true;
-      this.ta = textureIndices[0];
-      this.tb = textureIndices[1];
-    }
+    this.ta = textureIndices[0];
+    this.tb = textureIndices[1];
+    this.tc = textureIndices[2];
 
     this.color = defaultColor.slice();
     this.pixelColor = new Vector();
@@ -83,19 +79,16 @@ export default class Triangle {
 
     // set up distance functions (interpolation weights) along the left edge of the bounding rectangle.
     // values are kept un-normalized (ie not divided by determinant of full triangle) to retain precision.
-    // u = distance from a to bc, v = from b to ca, w = from c to ab
-    let uLeft = this.getDeterminant(vb, vc, p);
-    let vLeft = this.getDeterminant(vc, va, p);
-    let wLeft = determinant - uLeft - vLeft;
+    // [0] = distance from a to bc, [1] = from b to ca, [2] = from c to ab
+    const wLeft = new Vector(
+      this.getDeterminant(vb, vc, p),
+      this.getDeterminant(vc, va, p),
+      this.getDeterminant(va, vb, p)
+    );
 
-    // calculate per line / per pixel deltas for incremental evaluation of distance function
-    const dudx = vb[1] - vc[1];
-    const dvdx = vc[1] - va[1];
-    const dwdx = va[1] - vb[1];
-
-    const dudy = vb[0] - vc[0];
-    const dvdy = vc[0] - va[0];
-    const dwdy = va[0] - vb[0];
+    // calculate per pixel / per line deltas for incremental evaluation of distance function
+    const dwdx = new Vector(vb[1] - vc[1], vc[1] - va[1], va[1] - vb[1]);
+    const dwdy = new Vector(vb[0] - vc[0], vc[0] - va[0], va[0] - vb[0]);
 
     // trick: after perspective transform, the z distance from camera to vertex
     // is stored in the w coordinate. (The clip space and screen space transforms don't change it.)
@@ -116,27 +109,43 @@ export default class Triangle {
     const projectedZ = new Vector(va[2], vb[2], vc[2]);
     projectedZ.scale(invDeterminant);
 
-    let sDivZ, tDivZ;
-    if (this.isTextured) {
-      // texture x-coordinates for each vertex
-      sDivZ = new Vector(0.0, 1.0, 0.5);
-      sDivZ.multiply(zInverted);
+    // texture x-coordinates for each vertex
+    const sDivZ = new Vector(
+      textureCoordinates[this.ta][0],
+      textureCoordinates[this.tb][0],
+      textureCoordinates[this.tc][0]
+    );
+    sDivZ.multiply(zInverted);
 
-      // texture y-coordinates for each vertex
-      tDivZ = new Vector(0.0, 0.0, 1.0);
-      tDivZ.multiply(zInverted);
-    }
+    // texture y-coordinates for each vertex
+    const tDivZ = new Vector(
+      textureCoordinates[this.ta][1],
+      textureCoordinates[this.tb][1],
+      textureCoordinates[this.tc][1]
+    );
+    tDivZ.multiply(zInverted);
 
-    let nxDivZ, nyDivZ, nzDivZ;
-    if (this.smoothShading) {
-      // x, y, z components of each vertex normal
-      nxDivZ = new Vector(normalCoordinates[this.na][0], normalCoordinates[this.nb][0], normalCoordinates[this.nc][0]);
-      nyDivZ = new Vector(normalCoordinates[this.na][1], normalCoordinates[this.nb][1], normalCoordinates[this.nc][1]);
-      nzDivZ = new Vector(normalCoordinates[this.na][2], normalCoordinates[this.nb][2], normalCoordinates[this.nc][2]);
-      nxDivZ.multiply(zInverted);
-      nyDivZ.multiply(zInverted);
-      nzDivZ.multiply(zInverted);
-    }
+    // x, y, z components of each vertex normal
+    const nxDivZ = new Vector(
+      normalCoordinates[this.na][0],
+      normalCoordinates[this.nb][0],
+      normalCoordinates[this.nc][0]
+    );
+    nxDivZ.multiply(zInverted);
+
+    const nyDivZ = new Vector(
+      normalCoordinates[this.na][1],
+      normalCoordinates[this.nb][1],
+      normalCoordinates[this.nc][1]
+    );
+    nyDivZ.multiply(zInverted);
+
+    const nzDivZ = new Vector(
+      normalCoordinates[this.na][2],
+      normalCoordinates[this.nb][2],
+      normalCoordinates[this.nc][2]
+    );
+    nzDivZ.multiply(zInverted);
 
     let zBufferOffset = ymin * screenBuffer.width + xmin;
     let imageOffset = zBufferOffset * 4;
@@ -153,64 +162,50 @@ export default class Triangle {
     if (nWeight < 0) nWeight = 0;
 
     // keep the base color drawing color in a separate variable.
-    // assume flat shading. smooth shading or texturing will overwrite it
     this.pixelColor.copy(this.color);
-    this.pixelColor.scale(nWeight);
 
     // change in raster buffer offsets from one line to next
     const stride = screenBuffer.width - (xmax - xmin);
     const imageStride = 4 * stride;
 
     for (let y = ymin; y < ymax; y++) {
-      this.w[0] = uLeft;
-      this.w[1] = vLeft;
-      this.w[2] = wLeft;
+      this.w.copy(wLeft);
 
       for (let x = xmin; x < xmax; x++) {
-        if ((this.w[0] | this.w[1] | this.w[2]) > 0) {
-          const zBufferValue = projectedZ.dot(this.w);
-
-          if (zBufferValue > zBuffer[zBufferOffset]) {
+        if (this.w[0] > 0 && this.w[1] > 0 && this.w[2] > 0) {
+          const zValue = projectedZ.dot(this.w);
+          if (zValue > zBuffer[zBufferOffset]) {
             Triangle.pixelsDrawn++;
 
             if (zBuffer[zBufferOffset] > 0) Triangle.pixelsOverdrawn++;
+            zBuffer[zBufferOffset] = zValue;
 
-            zBuffer[zBufferOffset] = zBufferValue;
+            // first: reset the base color - it was rescaled in the previous run
+            this.pixelColor.copy(this.color);
 
-            // if smooth shading: calculate new weight, per pixel
-            if (this.smoothShading) {
-              // first: reset the base color - it was rescaled in the previous run
-              this.pixelColor.copy(this.color);
+            // interpolate the normal vector
+            // since we normalize the normal vector before using it in the lighting calculation
+            // we can skip the otherwise needed scaling of each component by z value.
+            // thus, only the sign of z matters, which here always will be negative
+            // since camera looks down negative z from origo
+            this.n[0] = -nxDivZ.dot(this.w);
+            this.n[1] = -nyDivZ.dot(this.w);
+            this.n[2] = -nzDivZ.dot(this.w);
+            this.n.normalize();
+            nWeight = -this.n.dot(this.lightDirection);
+            if (nWeight < 0) nWeight = 0;
 
-              // since we normalize the normal vector before using it in the lighting calcutaion
-              // we can skip the otherwise needed scaling of each component by z value.
-              // thus, only the sign of z matters, which here always will be negative
-              // since camera looks down negative z from origo
-              this.n[0] = -nxDivZ.dot(this.w);
-              this.n[1] = -nyDivZ.dot(this.w);
-              this.n[2] = -nzDivZ.dot(this.w);
-              this.n.normalize();
-              nWeight = -this.n.dot(this.lightDirection);
-              if (nWeight < 0) nWeight = 0;
-            }
+            // linearly interpolate 1/z values for perspective correct results
+            const interpolatedZInverted = zInverted.dot(this.w);
+            const perspectiveZ = 1 / interpolatedZInverted;
 
-            // if textured: calculate new base color (we overwrite the color, so no need to reset it)
-            if (this.isTextured) {
-              // linearly interpolate 1/z values for perspective correct results
-              const interpolatedZInverted = zInverted.dot(w);
-              const perspectiveZ = 1 / interpolatedZInverted;
+            const tx = sDivZ.dot(this.w) * perspectiveZ;
+            const ty = tDivZ.dot(this.w) * perspectiveZ;
+            // pixelColor = textureImage[255 * tx + ty];
 
-              const tx = sDivZ.dot(this.w) * perspectiveZ;
-              const ty = tDivZ.dot(this.w) * perspectiveZ;
-              // pixelColor = textureImage[255 * texY + texX];
-            }
+            // find final color based on normal
+            this.pixelColor.scale(nWeight);
 
-            // if either, recalculate final color
-            if (this.smoothShading || this.isTextured) {
-              this.pixelColor.scale(nWeight);
-            }
-
-            // if not, use precalculated color (flat shading)
             buffer[imageOffset + 0] = this.pixelColor[0];
             buffer[imageOffset + 1] = this.pixelColor[1];
             buffer[imageOffset + 2] = this.pixelColor[2];
@@ -219,15 +214,11 @@ export default class Triangle {
         }
         imageOffset += 4;
         zBufferOffset++;
-        this.w[0] -= dudx;
-        this.w[1] -= dvdx;
-        this.w[2] -= dwdx;
+        this.w.sub(dwdx);
       }
       imageOffset += imageStride;
       zBufferOffset += stride;
-      uLeft += dudy;
-      vLeft += dvdy;
-      wLeft += dwdy;
+      wLeft.add(dwdy);
     }
   }
 }

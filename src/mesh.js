@@ -14,7 +14,7 @@ export default class Mesh {
     this.triangles = [];
     this.localVertexnormals = [];
     this.worldVertexnormals = [];
-    this.texturecoords = [];
+    this.textureCoordinates = [];
 
     this.coordinates = []; // raw/imported coordinates
     this.localCoordinates = []; // raw/imported coordinates after local transform
@@ -32,6 +32,7 @@ export default class Mesh {
     console.log("Triangles:", obj.vertexindices.length);
 
     this.coordinates = obj.vertices.map((v) => new Vector(v[0], v[1], v[2]));
+    this.textureCoordinates = obj.texturecoords.map((t) => new Vector(t[0], t[1], 0));
 
     // TODO: create local transform - to center object in local origo? scale?
 
@@ -211,9 +212,14 @@ export default class Mesh {
   }
 
   render() {
+    // TODO Sort only front-facing tris
+    // 1) calculate determinant and mark if front facing
+    // 2) sort only the front facing ones
+    // 3) draw (if front-facing)
+
     this.sort();
     this.triangles.forEach((t) =>
-      t.draw(this.screenCoordinates, this.worldVertexnormals, this.texturecoords, this.screenBuffer, this.zBuffer)
+      t.draw(this.screenCoordinates, this.worldVertexnormals, this.textureCoordinates, this.screenBuffer, this.zBuffer)
     );
   }
 
