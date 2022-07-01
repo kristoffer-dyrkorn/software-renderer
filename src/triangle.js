@@ -15,8 +15,7 @@ export default class Triangle {
     this.tb = textureIndices[1];
     this.tc = textureIndices[2];
 
-    this.color = defaultColor.slice();
-    this.pixelColor = new Vector();
+    this.pixelColor = new Vector(defaultColor);
 
     // a light source at (inf, inf, inf), shining towards origo
     this.lightDirection = new Vector(-1, -1, -1);
@@ -29,6 +28,12 @@ export default class Triangle {
     // assume flat shading, ie the normal is constant for the entire triangle.
     // smooth shading will later overwrite the value (with interpolated vertex normals)
     this.n = new Vector();
+
+    // distance function sample points
+    this.p = new Vector();
+
+    // distance functions (interpolation weights) along the left edge of the bounding rectangle
+    this.wLeft = new Vector();
   }
 
   getDeterminant(a, b, c) {
@@ -41,7 +46,7 @@ export default class Triangle {
     return ab[1] * ac[0] - ab[0] * ac[1];
   }
 
-  draw(screenCoordinates, normalCoordinates, textureCoordinates, screenBuffer, zBuffer) {
+  draw(screenCoordinates, normalCoordinates, textureCoordinates, textureMap, screenBuffer, zBuffer) {
     const buffer = screenBuffer.data;
 
     // get screen coordinates for this triangle
@@ -62,7 +67,7 @@ export default class Triangle {
     // pre-store 1/determinant, to later replace divides by multiplication
     const invDeterminant = 1 / determinant;
 
-    // create bounding box around triangle, expanding area out to integer coordinates
+    // create bounding box around triangle, expanding coordinates out to integer values
     let xmin = Math.trunc(Math.min(va[0], vb[0], vc[0]));
     let xmax = Math.ceil(Math.max(va[0], vb[0], vc[0]));
     let ymin = Math.trunc(Math.min(va[1], vb[1], vc[1]));
@@ -74,17 +79,21 @@ export default class Triangle {
     ymin = Math.max(ymin, 0);
     ymax = Math.min(ymax, screenBuffer.height);
 
+    // skip triangle if bounding box is entirely outside the viewport
+    if (xmax < 0 || xmin > screenBuffer.width || ymax < 0 || ymin > screenBuffer.height) {
+      return;
+    }
+
     // do distance function sampling on pixel centers, not pixel corners
-    const p = new Vector(xmin + 0.5, ymin + 0.5, 0);
+    this.p[0] = xmin + 0.5;
+    this.p[1] = ymin + 0.5;
 
     // set up distance functions (interpolation weights) along the left edge of the bounding rectangle.
     // values are kept un-normalized (ie not divided by determinant of full triangle) to retain precision.
     // [0] = distance from a to bc, [1] = from b to ca, [2] = from c to ab
-    const wLeft = new Vector(
-      this.getDeterminant(vb, vc, p),
-      this.getDeterminant(vc, va, p),
-      this.getDeterminant(va, vb, p)
-    );
+    this.wLeft[0] = this.getDeterminant(vb, vc, this.p);
+    this.wLeft[1] = this.getDeterminant(vc, va, this.p);
+    this.wLeft[2] = this.getDeterminant(va, vb, this.p);
 
     // calculate per pixel / per line deltas for incremental evaluation of distance function
     const dwdx = new Vector(vb[1] - vc[1], vc[1] - va[1], va[1] - vb[1]);
@@ -92,24 +101,27 @@ export default class Triangle {
 
     // trick: after perspective transform, the z distance from camera to vertex
     // is stored in the w coordinate. (The clip space and screen space transforms don't change it.)
-    // the sign reversal converts from a distance to a z coordinate (since the camera is placed in origo)
+    // we reverse the sign to convert from a distance to a coordinate (as the camera is placed in origo)
 
-    // compute inverse z coordinates for each vertex, do linear interpolation using those values,
-    // and compute inverse again when actual value is needed.
-    // this gives perspective correct interpolation since 1/z is linear
+    // compute inverse z coordinates for each vertex, and do linear interpolation on the inverse values,
+    // and then compute inverse again (ie get the "actual value") when it is needed.
+    // this way we get perspective correct z interpolation since 1/z is linear
+    // perspective correct z values are needed for correct texture mapping
     const zInverted = new Vector(1 / -va[3], 1 / -vb[3], 1 / -vc[3]);
 
-    // pre-multiply by the normalization factor for interpolation weights, so that
-    // this multiply is not needed when calculating actual values (would cost one multiply per pixel)
+    // pre-multiply inverted z values at vertices by the inverse determinant (the normalization factor)
+    // so that this multiply is not needed when calculating each actual value.
+    // that would cost one multiply per pixel
     zInverted.scale(invDeterminant);
 
-    // use projected Z, range 1 (near plane) to 0 (far plane, at infinity)) for z buffer calculations
-    // the Z range is defined by the projection matrix, and chosen to maximise numerical precision
+    // use projected z values for each vertex, range 1 (near plane) to 0 (far plane, at infinity)
+    // for z buffer calculations. the projection matrix defines the z range, and the matrix values
+    // are chosen to maximise numerical precision.
     // see https://developer.nvidia.com/content/depth-precision-visualized
     const projectedZ = new Vector(va[2], vb[2], vc[2]);
     projectedZ.scale(invDeterminant);
 
-    // texture x-coordinates for each vertex
+    // texture x- and y-coordinates for each vertex, scaled by the corresponding inverse z value
     const sDivZ = new Vector(
       textureCoordinates[this.ta][0],
       textureCoordinates[this.tb][0],
@@ -117,7 +129,6 @@ export default class Triangle {
     );
     sDivZ.multiply(zInverted);
 
-    // texture y-coordinates for each vertex
     const tDivZ = new Vector(
       textureCoordinates[this.ta][1],
       textureCoordinates[this.tb][1],
@@ -125,7 +136,7 @@ export default class Triangle {
     );
     tDivZ.multiply(zInverted);
 
-    // x, y, z components of each vertex normal
+    // x, y, z components of each vertex normal, scaled by the corresponding inverse z value
     const nxDivZ = new Vector(
       normalCoordinates[this.na][0],
       normalCoordinates[this.nb][0],
@@ -150,26 +161,14 @@ export default class Triangle {
     let zBufferOffset = ymin * screenBuffer.width + xmin;
     let imageOffset = zBufferOffset * 4;
 
-    // keep the normal vector in a separate variable.
-    // assume flat shading, ie the normal is constant for the entire triangle.
-    // smooth shading will later overwrite the value (with interpolated vertex normals)
-    this.n.copy(normalCoordinates[this.na]);
-
-    // lambert light factor (cos N*-L)
-    // assume flat shading, ie a constant factor for the entire triangle.
-    // smooth shading will later overwrite the value (based on interpolated vertex normals)
-    let nWeight = -this.n.dot(this.lightDirection);
-    if (nWeight < 0) nWeight = 0;
-
-    // keep the base color drawing color in a separate variable.
-    this.pixelColor.copy(this.color);
-
-    // change in raster buffer offsets from one line to next
+    // stride: change in raster buffer offsets from one line to next
     const stride = screenBuffer.width - (xmax - xmin);
     const imageStride = 4 * stride;
 
+    let nWeight = 0.7;
+
     for (let y = ymin; y < ymax; y++) {
-      this.w.copy(wLeft);
+      this.w.copy(this.wLeft);
 
       for (let x = xmin; x < xmax; x++) {
         if (this.w[0] > 0 && this.w[1] > 0 && this.w[2] > 0) {
@@ -180,12 +179,9 @@ export default class Triangle {
             if (zBuffer[zBufferOffset] > 0) Triangle.pixelsOverdrawn++;
             zBuffer[zBufferOffset] = zValue;
 
-            // first: reset the base color - it was rescaled in the previous run
-            this.pixelColor.copy(this.color);
-
-            // interpolate the normal vector
+            // interpolate the normal vector (based on vertex normals)
             // since we normalize the normal vector before using it in the lighting calculation
-            // we can skip the otherwise needed scaling of each component by z value.
+            // we can skip the otherwise needed scaling of each component by camera space z value.
             // thus, only the sign of z matters, which here always will be negative
             // since camera looks down negative z from origo
             this.n[0] = -nxDivZ.dot(this.w);
@@ -195,20 +191,24 @@ export default class Triangle {
             nWeight = -this.n.dot(this.lightDirection);
             if (nWeight < 0) nWeight = 0;
 
-            // linearly interpolate 1/z values for perspective correct results
+            // get interpolated 1/z value (based on the 1/z value at the vertices) for this point in the triangle
             const interpolatedZInverted = zInverted.dot(this.w);
+            // get actual, perspective correct z value
             const perspectiveZ = 1 / interpolatedZInverted;
 
-            const tx = sDivZ.dot(this.w) * perspectiveZ;
-            const ty = tDivZ.dot(this.w) * perspectiveZ;
-            // pixelColor = textureImage[255 * tx + ty];
+            // get linearly interpolated s/z and t/z values for this point in the triangle
+            // then multiply by perspective correct z to get s and t values
+            const s = sDivZ.dot(this.w) * perspectiveZ;
+            const t = tDivZ.dot(this.w) * perspectiveZ;
 
-            // find final color based on normal
-            this.pixelColor.scale(nWeight);
+            // read integer part of texture coordinate and look up pixel value
+            const tx = Math.floor(s * 255);
+            const ty = Math.floor(t * 255);
+            const index = 3 * ((ty << 8) + tx);
 
-            buffer[imageOffset + 0] = this.pixelColor[0];
-            buffer[imageOffset + 1] = this.pixelColor[1];
-            buffer[imageOffset + 2] = this.pixelColor[2];
+            buffer[imageOffset + 0] = textureMap[index] * nWeight;
+            buffer[imageOffset + 1] = textureMap[index + 1] * nWeight;
+            buffer[imageOffset + 2] = textureMap[index + 2] * nWeight;
             buffer[imageOffset + 3] = 255;
           }
         }
@@ -218,7 +218,7 @@ export default class Triangle {
       }
       imageOffset += imageStride;
       zBufferOffset += stride;
-      wLeft.add(dwdy);
+      this.wLeft.add(dwdy);
     }
   }
 }

@@ -20,15 +20,13 @@ Currently implemented:
 - backface culling
 - z buffering, optimized to retain numerical precision
 - front-to-back polygon rendering, to minimize pixel overdraw
-- flat shading (single color polygons)
-- Gouraud shading (per vertex shading & interpolation of pixel colors)
+- perspective correct texture mapping
 - Lambert shading (interpolation of vertex normals & per pixel shading)
 - simple viewport clipping
 - reasonably optimized code
 
 To come:
 
-- perspective correct texture mapping (almost done)
 - even more optimized code
 
 ## Running

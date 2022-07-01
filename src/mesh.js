@@ -23,6 +23,18 @@ export default class Mesh {
     this.projectedCoordinates = [];
     this.clipCoordinates = [];
     this.screenCoordinates = [];
+
+    this.textureMap = new Array(3 * 256 * 256);
+
+    for (let y = 0; y < 255; y++) {
+      for (let x = 0; x < 255; x++) {
+        const xc = (x % 15) * 7 + 130;
+        const yc = (y % 15) * 7 + 130;
+        this.textureMap[3 * (y * 256 + x) + 0] = xc;
+        this.textureMap[3 * (y * 256 + x) + 1] = yc;
+        this.textureMap[3 * (y * 256 + x) + 2] = 150;
+      }
+    }
   }
 
   load(objData) {
@@ -36,7 +48,7 @@ export default class Mesh {
 
     // TODO: create local transform - to center object in local origo? scale?
 
-    // if object did not contain normals, generate face and then vertex normals
+    // if object did not contain normals, generate face normals and then vertex normals
     if (obj.vertexnormals.length === 0) {
       const generatedFaceNormals = obj.vertexindices.map((i, n) => {
         const a = this.coordinates[i[0]];
@@ -206,27 +218,35 @@ export default class Mesh {
 
     // also transform normals, using local transform (for now)
     // TODO: calculate total transform (local * world) and apply that to the normals
+    // OR, even, rotate just the light direction, using the inverse (compound) transform
     for (let i = 0; i < this.localVertexnormals.length; i++) {
       this.localTransform.transform(this.localVertexnormals[i], this.worldVertexnormals[i]);
     }
   }
 
   render() {
-    // TODO Sort only front-facing tris
-    // 1) calculate determinant and mark if front facing
-    // 2) sort only the front facing ones
-    // 3) draw (if front-facing)
+    // TODO
+    // 1) Determine triangle visibility in clip space
+    // 2) Z sort (in camera space) only the visible tris
+    // 3) draw tris in sorted order
 
     this.sort();
     this.triangles.forEach((t) =>
-      t.draw(this.screenCoordinates, this.worldVertexnormals, this.textureCoordinates, this.screenBuffer, this.zBuffer)
+      t.draw(
+        this.screenCoordinates,
+        this.worldVertexnormals,
+        this.textureCoordinates,
+        this.textureMap,
+        this.screenBuffer,
+        this.zBuffer
+      )
     );
   }
 
   // insertion sort the triangles so we draw them front to back
-  // the z-buffer handles visibility, but we would still like to avoid
-  // drawing (and shading) the same pixel twice (ie drawing a pixel that
-  // is later overdrawn by another, nearer pixel)
+  // the z-buffer ensures we only draw visible triangles, but we still want to avoid
+  // drawing (and performing shading calculations on) the same pixel twice
+  // if we draw a pixel that later is overdrawn by another, nearer pixel
   //
   // insertion sort is chosen since it is fast on nearly sorted arrays,
   // which we will have here due to frame coherence
