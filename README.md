@@ -4,7 +4,7 @@ A pure software renderer that displays OBJ files in your browser. Completely sel
 
 ## Example output
 
-![](https://github.com/kristoffer-dyrkorn/software-renderer/blob/main/images/cessna.jpg)
+![](https://github.com/kristoffer-dyrkorn/software-renderer/blob/main/images/cube.jpg)
 
 ## Why?
 
