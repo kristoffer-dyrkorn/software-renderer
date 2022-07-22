@@ -52,18 +52,18 @@ export default class Triangle {
 
     for (let y = ymin; y < ymax; y++) {
       for (let x = xmin; x < xmax; x++) {
-        p[0] = (x + 0.5) * FixedPointVector.MUL;
-        p[1] = (y + 0.5) * FixedPointVector.MUL;
+        p[0] = (x + 0.5) * FixedPointVector.MULTIPLIER;
+        p[1] = (y + 0.5) * FixedPointVector.MULTIPLIER;
 
         w[0] = this.getDeterminant(vb, vc, p);
         w[1] = this.getDeterminant(vc, va, p);
         w[2] = this.getDeterminant(va, vb, p);
 
-        if (isLeftOrTopEdge(vb, vc)) w[0] -= FixedPointVector.ONE;
-        if (isLeftOrTopEdge(vc, va)) w[1] -= FixedPointVector.ONE;
-        if (isLeftOrTopEdge(va, vb)) w[2] -= FixedPointVector.ONE;
+        if (isLeftOrTopEdge(vb, vc)) w[0] -= 1;
+        if (isLeftOrTopEdge(vc, va)) w[1] -= 1;
+        if (isLeftOrTopEdge(va, vb)) w[2] -= 1;
 
-        if ((w[0] | w[1] | w[2]) >= 0) {
+        if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];

@@ -1,4 +1,3 @@
-import Matrix from "./matrix.js";
 import Vector from "./vector.js";
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
@@ -11,9 +10,9 @@ export default class FixedPointVector extends Int32Array {
     this[3] = FixedPointVector.ONE;
 
     if (arguments.length === 3) {
-      this[0] = Math.round(x * FixedPointVector.MUL);
-      this[1] = Math.round(y * FixedPointVector.MUL);
-      this[2] = Math.round(z * FixedPointVector.MUL);
+      this[0] = Math.round(x * FixedPointVector.MULTIPLIER);
+      this[1] = Math.round(y * FixedPointVector.MULTIPLIER);
+      this[2] = Math.round(z * FixedPointVector.MULTIPLIER);
     }
     // copy constructor
     if (x instanceof FixedPointVector) {
@@ -24,10 +23,10 @@ export default class FixedPointVector extends Int32Array {
     }
     // convert from Vector
     if (x instanceof Vector) {
-      this[0] = Math.round(x[0] * FixedPointVector.MUL);
-      this[1] = Math.round(x[1] * FixedPointVector.MUL);
-      this[2] = Math.round(x[2] * FixedPointVector.MUL);
-      this[3] = Math.round(x[3] * FixedPointVector.MUL);
+      this[0] = Math.round(x[0] * FixedPointVector.MULTIPLIER);
+      this[1] = Math.round(x[1] * FixedPointVector.MULTIPLIER);
+      this[2] = Math.round(x[2] * FixedPointVector.MULTIPLIER);
+      this[3] = Math.round(x[3] * FixedPointVector.MULTIPLIER);
     }
   }
 
@@ -43,6 +42,12 @@ export default class FixedPointVector extends Int32Array {
     this[2] -= v[2];
   }
 
+  scale(s) {
+    this[0] *= s;
+    this[1] *= s;
+    this[2] *= s;
+  }
+
   copy(v) {
     this[0] = v[0];
     this[1] = v[1];
@@ -52,6 +57,6 @@ export default class FixedPointVector extends Int32Array {
 }
 
 FixedPointVector.SHIFT = 4;
-FixedPointVector.MUL = 2 ** FixedPointVector.SHIFT;
-FixedPointVector.ONE = FixedPointVector.MUL;
+FixedPointVector.MULTIPLIER = 2 ** FixedPointVector.SHIFT;
+FixedPointVector.ONE = FixedPointVector.MULTIPLIER;
 FixedPointVector.ONE_HALF = FixedPointVector.ONE / 2;

@@ -48,9 +48,9 @@ export default class Triangle {
     wLeft[1] = this.getDeterminant(vc, va, topLeft);
     wLeft[2] = this.getDeterminant(va, vb, topLeft);
 
-    if (isLeftOrTopEdge(vb, vc)) wLeft[0] -= FixedPointVector.ONE;
-    if (isLeftOrTopEdge(vc, va)) wLeft[1] -= FixedPointVector.ONE;
-    if (isLeftOrTopEdge(va, vb)) wLeft[2] -= FixedPointVector.ONE;
+    if (isLeftOrTopEdge(vb, vc)) wLeft[0] -= 1;
+    if (isLeftOrTopEdge(vc, va)) wLeft[1] -= 1;
+    if (isLeftOrTopEdge(va, vb)) wLeft[2] -= 1;
 
     // find per pixel / per line deltas so we can calculate w incrementally
     // note: we need to scale up deltas by the subpixel resolution since we
@@ -78,7 +78,7 @@ export default class Triangle {
       w.copy(wLeft);
 
       for (let x = xmin; x < xmax; x++) {
-        if ((w[0] | w[1] | w[2]) >= 0) {
+        if ((w[0] | w[1] | w[2]) > 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];
