@@ -36,7 +36,7 @@ We calculate what we call a determinant based on the three vertices. The determi
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/triangle.js#L12-L20
 
-The edges must be specified in a consistent (here: counterclockwise) order, and if that is followed, the determinant will be negative if the triangle is clockwise - ie if it is back-facing - and zero if the triangle is orthogonal to the screen - ie has zero area. In fact, the determinant value is twice the area of the triangle, and we will reuse this value for other purposes later on.
+The vertices for a triangle must be specified in a consistent (here: counterclockwise) order, and if that is followed, the determinant will be negative if the triangle is clockwise (which will happen if it is back-facing) and zero if the triangle is orthogonal to the screen (has zero area). The determinant value will always be twice the area of the triangle spanned out by two of the triangle edges, and we will reuse this property for other purposes later on.
 
 Checking the determinant value is an effective way to skip drawing those triangles in a 3D object that will not be visible anyway. This technique is often called back-face culling. 
 
