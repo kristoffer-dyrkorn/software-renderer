@@ -50,11 +50,13 @@ The code then looks like this:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/triangle.js#L53-L71
 
-We are now at the heart of the rasterizer. The method here is to loop through all pixels inside the bounding box and calculate three different determinants -  based on each of two triangle vertices, and the current pixel in the bounding box as the third vertex.
+We are now at the heart of the rasterizer. The method here is to loop through all pixels inside the bounding box and calculate three different determinants -  based on each of two triangle vertices in turn, plus the current pixel in the bounding box as the third vertex.
 
 The determinants will have positive values if the input vertices form a counterclockwise order. We use this property to check whether the current pixel is counterclockwise to *all* the edges in the triangle. If this is true (all three w components are larger than - or equal to - zero), the pixel will lie inside the triangle, and we write RGB and transparency values (the value 255 means "not transparent") to the specified offsets in the pixel buffer - before updating the offsets for the next iterations of the loops.
+
+For now, we consider a determinant value of zero - ie the candidate pixel lies exactly *on* a triangle edge - to mean that the pixel belongs to the triangle.
 
 The result looks like this:
 
 
-And with that, our basic rasterizer is up and running.
+And with that, our first, basic rasterizer is up and running.
