@@ -63,7 +63,7 @@ export default class Triangle {
         if (isLeftOrTopEdge(vc, va)) w[1]--;
         if (isLeftOrTopEdge(va, vb)) w[2]--;
 
-        if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
+        if (w[0] > 0 && w[1] > 0 && w[2] > 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];

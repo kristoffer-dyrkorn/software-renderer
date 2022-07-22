@@ -10,17 +10,17 @@ window.addEventListener("resize", resize);
 
 resize();
 
-const vertexIndices = [0, 1, 2];
-const triangle = new Triangle(vertexIndices, screenBuffer);
+const vertices = [];
+vertices.push(new Vector(140, 100, 0));
+vertices.push(new Vector(140, 40, 0));
+vertices.push(new Vector(80, 40, 0));
 
-const v0 = new Vector(140, 100, 0);
-const v1 = new Vector(140, 40, 0);
-const v2 = new Vector(80, 40, 0);
+const greenTriangleIndices = [0, 1, 2];
+const greenTriangle = new Triangle(greenTriangleIndices, screenBuffer);
 
-const vertices = [v0, v1, v2];
 const color = new Vector(120, 240, 100);
 
-triangle.draw(vertices, color);
+greenTriangle.draw(vertices, color);
 
 ctx.putImageData(screenBuffer, 0, 0);
 

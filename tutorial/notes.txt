@@ -1,7 +1,7 @@
 
 1. basic rasterizer
 
-low-resolution setup so we can see what's going on.
+low-resolution setup so we can see what's going on. note pixelated drawing.
 
 we set indices in constructor - and have a separate array for vertices. (so they can be modified without impacting the structure of the triangle. will return to that later.)
 
@@ -16,13 +16,15 @@ note lots of explicit calculations. full recalcuations for each pixel.
 
 2. moar triangles, moar problems
 
+we want to test this drawing more than one triangle. that way we can check whether we draw the edges correctly - ie all pixels that belong to a triangle should be drawn, and there should be no gaps or overlaps.
+
 f to toggle fill rule, space to toggle drawing of blue triangle
 
 so: what to do with those ON edge? we get overlaps. steals performance and leads to visual errors (result depends on the sequence we draw triangles in)
 
-why are we subtracting 1? and not some other number? it is just a tie breaker for the case that two different triangles have pixels that lie exactly ON the edge. the edge tests uses comparison with 0 - so adjusting by 1 is the smallest change that makes the pixels exactly on the edge belong to one tri and not the other.
+why are we subtracting 1? and not some other number? it is just a tie breaker for the case that two different triangles have pixels that lie exactly ON the edge. the edge tests uses comparison with 0 - so adjusting by 1 is the smallest change that makes the pixels exactly on the edge belong to one tri and not the other. the fill rule also means we can test for > 0 instead, the value 0 will not occur.
 
-and with that, we have now established the fill rule (it cannot be turned off/on by key pressesin the browser).
+and with that, we have now established the fill rule, from now on it cannot be turned off/on in the browser).
 
 3. animation
 
@@ -30,43 +32,43 @@ set up an animation where the triangle rotates, we use requestAnimationFrame.
 
 space to toogle drawing of the blue tri and p to pause the rotation
 
-put the basis coordinates of the vertices centered in origo, then calculate a new set of rotated vertices, and place them back onto somewhere around the middle of the screen.
+rotation is done this way: move the coordinates of the vertices so they are centered in origo, then calculate a new set of rotated vertices (ie rotated around origo), and then move the rotated vertices back onto the screen where they originally were put.
 
-note although the vertices rotate, but the triangle edge data (the triangle structure) remains the same. this is the reason for the separation between the constructor (set up static vertex pointers for the triangles) and draw method (set up data spesific for that draw call in the parameter).
+note that although the vertices rotate, the triangle structure (edge information) remains the same. this is the reason for the separation between the constructor (that sets up pointers to the vertices) and the draw method (that takes the array of all vertices as input parameter). this separation is a good match for index-based geometry, especially as we add more attributes to vertices (which we will do in the future).
 
-note the unsmooth rotation - we send integer coordinates to the rasterizer, and this makes the triangles jump. this can be improved!
+note the unsmooth rotation - we send integer coordinates to the rasterizer, and this makes the triangles jump - at times even so much that there are gaps. this can be improved!
 
 4a. let's go continuous!
 
 start by letting the rasterizer accept floating-point coordinates
 
-expand the bounding box out to integer coordinates that lie outside the input
+convert the bounding box to integer coordinates (here we are just truncating - ie cutting off the fractional part)
 
-also, we need to support continuous coordinates in the edge tests themself. that means we no longer consider pixels to have integer coordinates, but to lie on continuous axes, with the center of a pixel set to integer coordinate + 0.5. thus the edge function inside the bounding box needs to be evaluated at x + 0.5 and y + 0.5. (the + 0.5 is just a choice/convention, we here have choosen to let the left edge of the first pixel be x=0.)
+also, we need to support continuous coordinates in the edge tests themself. that means we no longer consider pixels to be points of zero area that are placed on integer coordinates, but instead they now are squares with an area that lie on continuous axes - with the center of a pixel set to the integer value + 0.5. thus the edge function inside the bounding box needs to be evaluated at x + 0.5 and y + 0.5.
+we evaluate the edge function at the center of the pixel.
+please note that adding 0.5 is just a choice/convention, we here have choosen to let the left edge of the first pixel be x=0. (also see http://www.realtimerendering.com/blog/the-center-of-the-pixel-is-0-50-5/ .)
 
-note the artifacts (the singel-pixel gap that moves between the triangles). the fill rule is correct and we use floating point numbers that should give us precision. what is wrong?
+note the obvious visual artifact here - the singel-pixel gap that moves between the triangles. the fill rule is correct and we use floating point numbers that should give us precision. what is wrong?
 
 4b.
 
-the rasterizer now runs on floating-point coordinates. unfortunately, floating-point calculations are not exact, and slight rounding errors (in the edge test, for example) might lead to visual artifacts - missed, or overdrawn, pixels. (here we observe gaps.) also, some floating-point operations take longer time than their corresponding integer versions.
+the rasterizer runs on floating-point coordinates. unfortunately, floating-point calculations are not exact, and slight rounding errors (in the edge test) will lead to visual artifacts: missed or overdrawn pixels. here we observe missed pixels - gaps between triangles - even when using double-precision floats, which is the JavaScript standard for numbers (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number). also, floating-point operations usually take longer time than their corresponding integer versions.
 
-what to do? make a hybrid. we multiply all coordinates by some fixed number, and round the result afterwards. this operation is effectively the same as subdividing the fractional part of a number into a fixed set of values - ie to do quantization. this hybrid number representaion is called fixed-point representation. it reduces the precision of the numbers we can represent, but at the same time it shifts all mathematical functions to be integer operations. so within the available precision we have, all operations will be exact. and as long as we multiply by a large enough number we will gain enough precision so that we keep the visual quality gained from using  floating point coordinates.
+what to do? we make a hybrid. we multiply all coordinates by some fixed number, and round the result off to an integer afterwards. this operation means we effectively subdivide the fractional part of a number into a fixed set of values - ie to quantize the fractional part. this hybrid number representaion is called fixed-point representation. it reduces the precision of the numbers we can represent, but at the same time it shifts all mathematical functions we need over to be integer operations. so within the available precision we have on a fixed-point number, all operations will be exact. as long as we multiply by a large enough number we will gain enough precision to match the smooth movement of using floating point coordinates.
  
-the number we choose to multiply by is some number 2^n. by doing that we can convert back to normal numbers very efficiently - we can bit-shift the integer value n positions to the right. this bit-shifting is the same as division without rounding. to support rounding we would need to add the value 0.5 (in fixed point representation) to the number before shifting.
+the number we choose to multiply by should be some number 2^n. then we can convert back to normal numbers very efficiently - we can bit-shift the fixed-point value n positions to the right to get back to the normal number. this bit-shifting is the same as division without rounding. to support rounding we would need to add the value 0.5 (in fixed-point representation) before shifting.
 
-so, we 1) keep the smooth movements, 2) avoid artifacts and 3) use very efficient integer calculations
+so, this way, we 1) keep the smooth movements, 2) avoid gaps and overlaps and 3) use efficient integer calculations.
 
-which number 2^n is right? a large number would be nice (provide for high decimal resolution), but we cannot use too much space for the decimal part. 
+which number 2^n is right? a large number would be nice (provide for high fractional resolution), but we cannot use too much space for the fractional part - we would like to keep the entire number (both integer and fractional part) inside a 32-bit (signed) integer, thus the total amout of bits we can spend on the integer and fractional parts in total is 31. (one bit is reserved for the sign - we need to support negative values.)
 
-we would like to keep the entire number (both integer part and decimal part) inside a 32-bit (signed) integer, thus the total amout of bits we can spend on the integer and decimal parts in total is 31. 
+if we assume the x and y screen coordinates are in the range 0..2048, the integer part would fit inside 11 bits (2^11 = 2048). however, when we calculate the determinant we multiply two fixed-point numbers, which means we need to have space for double the number of integer bits, ie a total of 22 bits, inside our representation. under this assumption the maximum we can allocate for the fractional part of the number will be 9 bits. that is, we could divide each screen pixel into 9 subpixels.
 
-if we assume the x and y screen coordinates are in the range 0..2048, the integer part would fit inside 11 bits. however, when we calculate the determinant we multiply two fixed-point numbers, which means we need to have space for double the number of integer bits, ie 22 bits, inside our representation. under this assumption the maximum number of bits to allocate for the decimal part is 9.
+however, there are few noticeable improvements when you increase subpixel resolution beyond 4 - ie use 4 bits for the fractional part. so we have chosen that here. (the standard for GPUs nowadays seems to be 8 bits.)
 
-ie we could divide each screen pixel into 9 subpixels.
+choosing 4 bits means we multiply incoming floating point numbers by 2^4 = 16 and then round them off to an integer. to get from a fixed-point representation of a number back to a normal number we shift right by 4 places. 
 
-normally, there are few noticeable improvements when you increase subpixel resolution beyond 4 - ie use 4 bits for the decimal part. and 4 bits of precision is also the GPU (hardware) implementation standard. so we have chosen that here. 4 bits means we multiply incoming floating point numbers by 16 (after rounding). this means we need to shift right by 4 to get back to a normal integer number. using 4 bits for the decimal part we have some extra headroom for calculations as well - we will not overflow so easily.
-
-in short, by using fixed point numbers we create a larger resolution "virtual grid" of the pixels on screen, and perform precise integer calculations on that grid. moreover, the same quantization takes place for all the coordinates. that means, we essentially snap coordinates to the subpixel grid.
+in short, by using fixed point numbers we create a larger resolution "invisible grid" of the screen, and perform precise integer calculations on that grid while drawing on the normal pixel grid. moreover, the same quantization takes place for all incoming coordinates. that means, we essentially snap incoming floating point values to subpixel values.
 
 but - looking at the triangle rasterizer code now we see that we do a lot of operations per pixel. we need to optimize that.
 
@@ -77,17 +79,17 @@ on my machine, drawing this single triangle takes about 4.3 ms. we can go faster
 5. let's go incremental!
 
 convert input to fixed point coords
-setup up the determinant calculation to happen at top left pix in bounding box
+set up the determinant calculation to happen at top left pix in bounding box
 keep the w value for left side of bbox
 find dwdx and dwdy
 
 loop inside bbox
-- update wLeft with dwdy
-- evaluate w
-- update w with dwdx (the sub is just convention, dep on sub sequence, wanted code to look like as for dx)
-- update w with dwdy
+- set w to the current wLeft value
+- evaluate w: if we now are inside, draw the pixel
+- for each x: add the incremental step dwdx onto w (the sub is just convention, dep on sequence of variables, wanted code to look like as for dwdy)
+- add dwdy onto wLeft before going to next line
 
-do you remember the fill rule - and tie breaker for pixels exactly on the edge? so far we have always tested for w >= 0. as we changed to fixed point arithmetic the snapping to subpixels means that we can test for > 0 instead. we can also rephrase the test for each component of w - we can bitwise OR the three numbers together before testing whether the resulting value is larger than zero.
+we can also rephrase the test for each component of w - since w is stored internally as an integer we can bitwise OR the three components together before testing whether the resulting value is larger than zero. this saves some branching, which can be very expensive on modern CPUs.
 
 triangle drawing now takes 0.26 ms, 6% of the time the previous version needed - or: a 16x speedup.
 
@@ -133,6 +135,8 @@ but.... this takes longer time! 0.30 ms vs 0.27 - the reason is most likely due 
 
 sometimes it is the case that the most efficient way (fewest steps) is *not* the fastest way. modern CPUs can very quickly run through loops of unconditional code - but as soon as code contains branches (if statements) the execution times will increase a lot.
 
+so - always measure whether your optimizations actually become optimizations!
+
 ---
 
 and with that, we have built a correct and reasonably efficient triangle rasteizer.
@@ -148,6 +152,13 @@ def avoid not per pixel, but also avoid per triangle draw. ie: many triangles pe
 
 
 ---
+
+based on method described in Juan Pineda's paper from 1988
+
+first post (2004) which a lot of code on the web seems to be based on:
+https://web.archive.org/web/20120220025947/http://devmaster.net/forums/topic/1145-advanced-rasterization/
+
+https://fgiesen.wordpress.com/2013/02/06/the-barycentric-conspirac/
 
 https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-practical-implementation
 
