@@ -59,4 +59,4 @@ For now, we consider a determinant value of zero - ie the candidate pixel lies e
 The result looks like this:
 
 
-And with that, our first, basic rasterizer is up and running.
+And with that, we have our first, basic, rasterizer is up and running.
