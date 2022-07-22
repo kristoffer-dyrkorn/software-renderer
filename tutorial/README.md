@@ -54,7 +54,7 @@ We are now at the heart of the rasterizer. The method here is to loop through al
 
 The determinants will have positive values if the input vertices form a counterclockwise order. We use this property to check whether the current pixel is counterclockwise to *all* the edges in the triangle. If this is true (all three w components are larger than - or equal to - zero), the pixel will lie inside the triangle, and we write RGB and transparency values (the value 255 means "not transparent") to the specified offsets in the pixel buffer - before updating the offsets for the next iterations of the loops.
 
-For now, we consider a determinant value of zero - ie the candidate pixel lies exactly *on* a triangle edge - to mean that the pixel belongs to the triangle.
+For now, we consider a determinant value of zero - ie the candidate pixel lies exactly *on* a triangle edge - to mean that the pixel belongs to the triangle. The determinant can also be seen as an edge distance function as it will have a value that scales proportionally with the distance from a triangle edge to a candidate point. And as mentioned, the sign will tell which side of an edge the candidate point lies on.
 
 The result looks like this:
 
