@@ -22,10 +22,9 @@ Should you want to set the _size_ of the element itselt in the browser window, y
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L32-L33
 
-The code in this these two examples set up a canvas element to cover the entire browser window, and to have a pixel resolution that depends on the given `devicePixelRatio`.
+The last two code examples set up a canvas element to cover the entire browser window, and to have a pixel resolution that depends on the given `devicePixelRatio`, which in our case will be 0.2. So one canvas pixel will be 5 physical pixels.
 
-
-The default behaviour for browsers is to smooth out low resolution graphics to they become less jaggy. However, we want the opposite: We want to see clear, boxy pixels on our screens. To support that, we style the `<canvas>` element in HTML with a message to the browser to not smooth out the pixels:
+The default behaviour for browsers is to smooth out low resolution graphics in the canvas to become less jaggy. However, we want the opposite: We want to see sharp, boxy pixels on our screens. To support that, we style the `<canvas>` element in HTML with a message to the browser to not do any smoothing of pixels:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.html#L5
 
