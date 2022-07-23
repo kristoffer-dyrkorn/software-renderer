@@ -1,62 +1,49 @@
 # A fast and correct triangle rasterizer
 
-We will first build a simple version to get to know the concepts. Then we will gradually refine the code - and you will get to know more details and the reasoning behind the changes in each step.
+In this section, you will get to know how to use the `<canvas>` element to draw individual pixels in a browser window. This will set the stage for drawing triangles - which we will do in the next section.
 
-First, we set up the HTML for our page:
+## The drawing surface
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/35b8d4f4f435ff3b1a0970fafe0983cbe24cf18b/tutorial/1/index.html#L1-L8
+To be able to draw rasterized triangles in a browser window, we need a surface to draw on. This is easily handled the `<canvas>` tag. A canvas is an block element - with size parameters specified both in the element itself, _and_ in CSS. Why both?
 
-We are going to render pixel to a `<canvas>` tag, and note that we specify pixelated rendering in the CSS. The reason is that we - for now - will use low-resolution (anti-retina?) renderings so we can see details more clearly. Similar to what is normal for high DPI rendering we set a custom `devicePixelRatio` and use that to set the actual canvas resolution although the canvas element size is kept at the full width and height of the browser window.
+If you, in JavaScript, get hold of a canvas element, say - like this:
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/b9838d4ed1d1c3173e927a024fa67030cc5c49a7/tutorial/1/index.js#L28-L33
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L4
 
-This is how we get the pixel buffer - an array of Uint8 / byte values (one byte for each of the red, green, blue and alpha channels) that we will write pixel values to.
+...then the element object will have `width` and `height` properties that you can manipulate:
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/index.js#L35
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L29-L30
 
-This is what the main application does:
+As the `devicePixelRatio` might reveal: These properties decide the resolution of the drawing surface. That is, the number of pixels it will contain - horizontally and vertically. In the normal case, you would like to read out the `window.devicePixelRatio` property to use that to set high DPI resolution, if that is available on your platform.
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/index.js#L13-L23
+Should you want to set the _size_ of the element itselt in the browser window, you use CSS. In JavaScript:
 
-In short, we set vertex coordinates for three vertices in a triangle (here, in the `<canvas>` coordinate system, the positive `y` axis points downwards), define indices to those points, instantiate a `Triangle` object, define a color by its RGB values, and draw the triangle using the vertex coordinate array and the color.
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L32-L33
 
-The code relies on a `Vector` class that we use for coordinates, colors and other numbers that need to be grouped together.
+The code in this these two examples set up a canvas element to cover the entire browser window, and to have a pixel resolution that depends on the given `devicePixelRatio`.
 
-Note that we set the vertex indices in the constructor, and keep a separate array around for the vertex values themselves. This way the vertices can be moved around without impacting the structure of the triangle. We will return to this later when we will start animating our triangles.
+When drawing triangles it is nice to work in low resolution, that means we can more easily see what is going on. So we would like to see large pixels. After some experimenting, a `devicePixelRatio` of 0.2 is a suitable value.
 
-Also see that the vertices are specified in counterclockwise order. We rely heavily on this convention, see the next section. 
+The default behaviour for browsers is to smooth out low resolution graphics to they become less jaggy. However, we want the opposite: We want to see clear, boxy pixels on our screens. To support that, we style the `<canvas>` element in HTML with a message to the browser to not smooth out the pixels:
 
-Let's have a look at the start of the triangle drawing method - ie the actual rasterizer:
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.html#L5
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/triangle.js#L22-L34
+## Pixels in the browser
 
-The first step is to read out the actual coordinates (passed along in the parameter) using the indices that were previously provided in the constructor. We name the three vertices `va`, `vb` and `vc`. They are three-dimensional `Vector`s that have x, y and z coordinates. (For now we set all z coordinates to zero.)
+When we want to draw pixels on the screen we need to know the coordinates of the pixel, and the color it should have. In a canvas, there is a array for Uint8 (byte) values that we need to manipulate. The array contains all the pixels that are shown in the canvas, stored as 4 byte values per pixel (one value each for the red, blue, green and transparency channels). The byte values are stored sequentially in the buffer. That means: To draw a pixel at a spesific (x, y) coordinate, we need to convert the coordinate to an array index. This can by done by the following formula: `index = 4 * (y * width + x)`. (We multiply by 4 since there are 4 byte values per pixel.)
 
-We calculate what we call a determinant based on the three vertices. The determinant effectively is the z-coordinate of a cross product (a normal vector) defined by two of the triangle edges. The code looks like this:
+However, we don't draw directly to the canvas array. Instead, we create a separate array (often called a buffer), draw on that, an then copy that buffer over to the canvas. This way of doing things eliminates screen flicker that might otherwise appear when drawing to the screen as the screen is refreshed (something that takes place 60 times per second).
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/triangle.js#L12-L20
+How do we get hold of the buffer that we will write pixel values to? First, we need get hold of a so-called `drawing context` for the canvas element:
 
-The vertices for a triangle must be specified in a consistent (here: counterclockwise) order, and if that is followed, the determinant will be negative if the triangle is clockwise (which will happen if it is back-facing) and zero if the triangle is orthogonal to the screen (has zero area). The determinant value will always be twice the (signed) area of the triangle spanned out by two of the triangle edges, and we will reuse this property for other purposes later on.
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L5
 
-Checking the determinant value is an effective way to skip drawing those triangles in a 3D object that will not be visible anyway. This technique is often called back-face culling. 
+Then, the buffer is available like this - note that we need to specify a width and a height, which for us is the same as the full canvas:
 
-The next step is to find the minimum and maximum coordinates for the vertices - the corner coordinates for a bounding box around the triangle. We also calculate the offset in the pixel buffer for the upper left corner of the bounding box, and the stride (offset) from one pixel in the pixel buffer to the same pixel directly below.
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L35
 
-Then we define two `Vector`s, one to hold a variable `w` (explained in the next section) and one `p` that holds the x- and y-coordinates of the current pixel.
+After having put red, green, blue and transparency values in the buffer, we put the buffer onscreen this way (the two last parameters specify the pixel coordinates in the canvas where the buffer should be placed).
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/triangle.js#L36-L51
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L25
 
-The code then looks like this:
-
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/4f1408b2d6417f21e115d0cc514d098f1868fa51/tutorial/1/triangle.js#L53-L71
-
-We are now at the heart of the rasterizer. The method here is to loop through all pixels inside the bounding box and calculate three different determinants -  based on each of two triangle vertices in turn, plus the current pixel in the bounding box as the third vertex.
-
-The determinants will have positive values if the input vertices form a counterclockwise order. We use this property to check whether the current pixel is counterclockwise to *all* the edges in the triangle. If this is true (all three w components are larger than - or equal to - zero), the pixel will lie inside the triangle, and we write RGB and transparency values (the value 255 means "not transparent") to the specified offsets in the pixel buffer - before updating the offsets for the next iterations of the loops.
-
-For now, we consider a determinant value of zero - ie the candidate pixel lies exactly *on* a triangle edge - to mean that the pixel belongs to the triangle. The determinant can also be seen as an edge distance function as it will have a value that scales proportionally with the distance from a triangle edge to a candidate point. And as mentioned, the sign will tell which side of an edge the candidate point lies on.
-
-The result looks like this:
-
-
-And with that, we have our first, basic, rasterizer up and running.
+And with that, we have all the operations needed to start drawing triangles. We will do that in the next section!
