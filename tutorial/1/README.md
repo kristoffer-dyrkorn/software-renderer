@@ -1,10 +1,10 @@
 # A fast and correct triangle rasterizer
 
-In this section, you will get to know the principles behind triangle rasterization and the overall method that we will follow in this tutorial. 
+In this section, you will get to know the rasterization method that we will use in this tutorial. 
 
 ## Overview
 
-The method described here was published by Juan Piñeda in 1988, in a paper called ["A Parallel Algorithm for Polygon Rasterization"](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf). There exists many implementations of his idea out there on the web, but the oldest one seems to by the user Nick in the forum at the game developer site devmaster.net in 2004. That code appears to have inspired many other implementations of triangle rasterizers. The web site is no longer available, but the Internet Archive [has a copy](https://web.archive.org/web/20120220025947/http://devmaster.net/forums/topic/1145-advanced-rasterization/) if you are interested. 
+The method described here was first published by Juan Piñeda in 1988, in a paper called ["A Parallel Algorithm for Polygon Rasterization"](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf). There exists many implementations of his idea out there on the web, but the oldest one seems to by the user `Nick` in the forum at the game developer site devmaster.net in 2004. That code appears to have inspired many other implementations of triangle rasterizers. The web site is no longer available, but the Internet Archive [has a copy](https://web.archive.org/web/20120220025947/http://devmaster.net/forums/topic/1145-advanced-rasterization/) if you are interested. 
 
 ## The inside test
 
