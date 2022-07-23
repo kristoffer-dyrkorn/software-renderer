@@ -4,7 +4,7 @@ In this section, you will get to know how to use the `<canvas>` element to draw 
 
 ## The drawing surface
 
-To be able to draw rasterized triangles in a browser window, we need a surface to draw on. This is easily handled the `<canvas>` tag. A canvas is an block element - with size parameters specified both in the element itself, _and_ in CSS. Why both?
+To be able to draw rasterized triangles in a browser window, we need a surface to draw on. This is easily created by using the `<canvas>` HTML5 tag. A canvas is an block element, with size parameters specified both in the element itself, _and_ in CSS. Why both?
 
 If you, in JavaScript, get hold of a canvas element, say - like this:
 
