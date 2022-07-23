@@ -2,7 +2,7 @@
 
 We will first build a simple version to get to know the concepts. Then we will gradually refine the code - and you will get to know more details and the reasoning behind the changes in each step.
 
-1. The principles behind all of this
+1. An overview of the method
 2. Some setup code to start with
 3. The first, basic rasterizer
 4. Moar triangles, moar problems
