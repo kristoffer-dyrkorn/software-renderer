@@ -17,7 +17,7 @@ Finding out if a point is to the left of an edge is not so hard. We can use a so
 In code, it looks like this:
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b194285ec7bc39a976a7fcbd54/tutorial/3/triangle.js#L12-L20
 
-The code here receives three input points `a`, `b` and `c`, and calculates two vectors `ab` and `ac`. The vectors contain the differences in x- and y-coordinates when going from `a` to `b` and from `a` to `c`. It then cross-multiplies the x- and y-coordinates of the vectors and substracts one product from the other. (In the code here, a `Vector` simply represents an array of values - where the value at index 0 is an x-coordinate, and at the value at index 1 is an y-coordinate.)
+The code here receives three input points `a`, `b` and `c`, and calculates two vectors `ab` and `ac`. The vectors contain the differences in x- and y-coordinates when going from `a` to `b` and from `a` to `c`. It then cross-multiplies the x- and y-coordinates of the vectors and substracts one product from the other. (In the code here, a `Vector` simply represents an array of values - where the value at index 0 is an x-coordinate, and at the value at index 1 is an y-coordinate.) The result is the determinant value.
 
 You may recognize this calculation as a cross-product, and it is: The determinant value is the z-component of a cross product of to three-dimensional vectors `ab` and `ac`. (Here we only see the vectors as two-dimenstional, we don't care about their z value).
 
