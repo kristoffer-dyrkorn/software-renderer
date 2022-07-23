@@ -14,7 +14,9 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8db30fdc0f8d215eb414a4/tutorial/3/index.js#L29-L30
 
-As the `devicePixelRatio` might reveal: These properties decide the resolution of the drawing surface. That is, the number of pixels it will contain - horizontally and vertically. In the normal case, you would like to read out the `window.devicePixelRatio` property to use that to set high DPI resolution, if that is available on your platform.
+As the `devicePixelRatio` might reveal: These properties decide the resolution of the drawing surface. That is, the number of pixels it will contain - horizontally and vertically. In the normal case, you would like to read out the `window.devicePixelRatio` property to use that to set high DPI resolution for your canvas.
+
+However, when drawing triangles it is nice to work in a low resolution, so we more easily can see what is going on. So we would like to see large pixels. Some experimenting tells us that a `devicePixelRatio` of 0.2 could be a suitable value.
 
 Should you want to set the _size_ of the element itselt in the browser window, you use CSS. In JavaScript:
 
@@ -22,7 +24,6 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8
 
 The code in this these two examples set up a canvas element to cover the entire browser window, and to have a pixel resolution that depends on the given `devicePixelRatio`.
 
-When drawing triangles it is nice to work in low resolution, that means we can more easily see what is going on. So we would like to see large pixels. After some experimenting, a `devicePixelRatio` of 0.2 is a suitable value.
 
 The default behaviour for browsers is to smooth out low resolution graphics to they become less jaggy. However, we want the opposite: We want to see clear, boxy pixels on our screens. To support that, we style the `<canvas>` element in HTML with a message to the browser to not smooth out the pixels:
 
