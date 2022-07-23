@@ -4,14 +4,11 @@ In this section, you will get to know the principles behind triangle rasterizati
 
 ## Overview
 
-The method described here was published by Juan Pineda in 1988, in a paper called ["A Parallel Algorithm for Polygon Rasterization"](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf). There exists many implementations of this method out there on the web, but the first one seems to by the user Nick in the forum at the game developer site devmaster.net in 2004. That code appears to have inspired many later implementations of triangle rasterizers.
-
-The web site devmaster.net is no longer available, but the Internet Archive [fortunately has a copy](https://web.archive.org/web/20120220025947/http://devmaster.net/forums/topic/1145-advanced-rasterization/). 
-
+The method described here was published by Juan Pineda in 1988, in a paper called ["A Parallel Algorithm for Polygon Rasterization"](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf). There exists many implementations of his idea out there on the web, but the oldest one seems to by the user Nick in the forum at the game developer site devmaster.net in 2004. That code appears to have inspired many other implementations of triangle rasterizers. The web site is no longer available, but the Internet Archive [has a copy](https://web.archive.org/web/20120220025947/http://devmaster.net/forums/topic/1145-advanced-rasterization/) if you are interested. 
 
 ## The inside test
 
-The method here relies on being able to find out if a point is inside a triangle or not. To be able do that efficiently, we set up our triangles in a spesific way: We orient the vertices in a fixed order - in our case counterclockwise. So, when going from the first vertex and to the next, and then to the last one, we have made a counterclockwise turn.
+Pineda's method relies on being able to find out if a point is inside a triangle or not. To be able do that efficiently, we set up our triangles in a spesific way: We orient the vertices in a fixed order - in our case counterclockwise. So, when going from the first vertex and to the next, and then to the last one, we have made a counterclockwise turn.
 
 When all triangles follow that convention, we can define a rule that decides if a point is inside a triangle or not: "If a candidate point is to the left of all three edges when we visit the vertices in order, the point is inside the triangle." 
 
