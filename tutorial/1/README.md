@@ -4,8 +4,6 @@ In this section, you will get to know the principles behind triangle rasterizati
 
 ## Overview
 
-[test](www.vg.no)
-
 The method described here was published by Juan Pineda in 1988, in a paper called ["A Parallel Algorithm for Polygon Rasterization"](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf). There exists many implementations of this method out there on the web, but the first one seems to by the user Nick in the forum at the game developer site devmaster.net in 2004. That code appears to have inspired many later implementations of triangle rasterizers.
 
 The web site devmaster.net is no longer available, but the Internet Archive [fortunately has a copy](https://web.archive.org/web/20120220025947/http://devmaster.net/forums/topic/1145-advanced-rasterization/). 
