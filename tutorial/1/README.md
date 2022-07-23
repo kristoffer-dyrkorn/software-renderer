@@ -33,11 +33,10 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b1942
 
 ## Drawing the triangle
 
-At this point, we are ready: We can loop through all points inside the bounding box, calculate three determinant values (based on each of the triangle edges and the candidate point), and if all determinant values are positive, we know that the point is inside the triangle. In that case we paint the pixel at the candidate point with the triangle's color. 
+At this point, we are ready: We can loop through all points inside the bounding box, calculate three determinant values (based on each of the triangle edges and the candidate point), and if all determinant values are positive, we know that the point is inside the triangle. In that case we paint the pixel at the candidate point with the triangle's color. (For now we also assume that pixels exactly on a triangle edge belongs to that triangle.)
 
 The code looks like this:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b194285ec7bc39a976a7fcbd54/tutorial/3/triangle.js#L53-L72
 
-Some parts of the code here will be explained in the next section, where we discuss the setup for drawing pixels in a browser.
-As you might see - for now we will also assume that pixels lying exactly on a triangle edge, ie has a determinant value of zero, belong to that triangle.
+Some parts of that code takes care of drawing pixels, and has not been explained yet. Don't worry, we will get to that in the next section, where we discuss the setup for drawing pixels in a browser. 
