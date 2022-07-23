@@ -12,7 +12,7 @@ Pineda's method relies on being able to find out if a point is inside a triangle
 
 When all triangles follow that convention, we can define a rule that decides if a point is inside a triangle or not: "If a candidate point is to the left of all three edges when we visit the vertices in order, the point is inside the triangle." 
 
-Finding out if a point is to the left of and edge is not so hard. We can use a so-called determinant for that - this is a function that takes in three points, an edge start point, an edge end point, and a candidate point to test. The determinant function returns a positive number of the candidate point is to the left of the edge, it returns zero if the point is on the edge, and it returns a negative number if the point is to the right.
+Finding out if a point is to the left of an edge is not so hard. We can use a so-called determinant for that - a function that takes in three points, an edge start point, an edge end point, and a candidate point to test. The determinant will be a positive number if the candidate point is to the left of the edge, it will be zero if the point is exactly on the edge, and it will be negative if the point is to the right.
 
 In code, it looks like this:
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b194285ec7bc39a976a7fcbd54/tutorial/3/triangle.js#L12-L20
