@@ -32,6 +32,8 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8
 
 When we want to draw pixels on the screen we need to know the coordinates of the pixel and the color it should have. Inside a canvas element, there is an array of Uint8 (byte) values that we need to manipulate. The array contains all the pixels that are shown in the canvas - stored as 4 byte values per pixel (one value for each of the red, blue, green and transparency channels). The byte values are stored sequentially in the buffer, which means: To draw a pixel at a spesific (x, y) location, we need to convert the (x, y) coordinates to an array index. This is done with the following formula: `index = 4 * (y * width + x)`. (The multiplication by 4 is needed since there are 4 byte values per pixel.)
 
+Note: In the canvas coordinate system, (0, 0) is the top left pixel. The x-axis goes to the right, and the y-axis goes downwards.
+
 However, we don't draw directly to the canvas array. Instead, we create a separate array (often called a buffer), draw on that, an then copy the contents of that buffer over to the canvas. This way of doing things eliminates screen flicker that might otherwise appear when drawing directly to the screen while the screen is being refreshed (something that takes place 60 times per second).
 
 How do we get hold of the buffer that we will write our pixel values to? First, we need get hold of a so-called `drawing context` for the canvas element:
