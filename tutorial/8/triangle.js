@@ -1,4 +1,4 @@
-import Vector from "../lib/vector.js";
+import FixedPointVector from "../lib/fixedpointvector.js";
 
 export default class Triangle {
   constructor(vertexIndices, screenBuffer) {
@@ -10,10 +10,10 @@ export default class Triangle {
   }
 
   getDeterminant(a, b, c) {
-    const ab = new Vector(b);
+    const ab = new FixedPointVector(b);
     ab.sub(a);
 
-    const ac = new Vector(c);
+    const ac = new FixedPointVector(c);
     ac.sub(a);
 
     return ab[1] * ac[0] - ab[0] * ac[1];
@@ -21,9 +21,9 @@ export default class Triangle {
 
   draw(screenCoordinates, color) {
     // get screen coordinates for this triangle
-    const va = screenCoordinates[this.va];
-    const vb = screenCoordinates[this.vb];
-    const vc = screenCoordinates[this.vc];
+    const va = new FixedPointVector(screenCoordinates[this.va]);
+    const vb = new FixedPointVector(screenCoordinates[this.vb]);
+    const vc = new FixedPointVector(screenCoordinates[this.vc]);
 
     const determinant = this.getDeterminant(va, vb, vc);
 
@@ -34,10 +34,10 @@ export default class Triangle {
     }
 
     // create bounding box around triangle
-    let xmin = Math.min(va[0], vb[0], vc[0]);
-    let xmax = Math.max(va[0], vb[0], vc[0]);
-    let ymin = Math.min(va[1], vb[1], vc[1]);
-    let ymax = Math.max(va[1], vb[1], vc[1]);
+    let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
+    let xmax = Math.max(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
+    let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+    let ymax = Math.max(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
@@ -45,21 +45,25 @@ export default class Triangle {
     const imageStride = 4 * (this.buffer.width - (xmax - xmin));
 
     // w = edge distances
-    const w = new Vector();
+    const w = new FixedPointVector();
 
     // p = screen coordinates
-    const p = new Vector();
+    const p = new FixedPointVector();
 
     for (let y = ymin; y < ymax; y++) {
       for (let x = xmin; x < xmax; x++) {
-        p[0] = x;
-        p[1] = y;
+        p[0] = (x + 0.5) * FixedPointVector.MULTIPLIER;
+        p[1] = (y + 0.5) * FixedPointVector.MULTIPLIER;
 
         w[0] = this.getDeterminant(vb, vc, p);
         w[1] = this.getDeterminant(vc, va, p);
         w[2] = this.getDeterminant(va, vb, p);
 
-        if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
+        if (isLeftOrTopEdge(vb, vc)) w[0] -= 1;
+        if (isLeftOrTopEdge(vc, va)) w[1] -= 1;
+        if (isLeftOrTopEdge(va, vb)) w[2] -= 1;
+
+        if (w[0] > 0 && w[1] > 0 && w[2] > 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];
@@ -70,4 +74,10 @@ export default class Triangle {
       imageOffset += imageStride;
     }
   }
+}
+
+function isLeftOrTopEdge(start, end) {
+  const edge = new FixedPointVector(end);
+  edge.sub(start);
+  if (edge[1] < 0 || (edge[1] == 0 && edge[0] > 0)) return true;
 }

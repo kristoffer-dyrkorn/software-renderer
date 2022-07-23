@@ -1,4 +1,4 @@
-import FixedPointVector from "../lib/fixedpointvector.js";
+import Vector from "../lib/vector.js";
 
 export default class Triangle {
   constructor(vertexIndices, screenBuffer) {
@@ -10,10 +10,10 @@ export default class Triangle {
   }
 
   getDeterminant(a, b, c) {
-    const ab = new FixedPointVector(b);
+    const ab = new Vector(b);
     ab.sub(a);
 
-    const ac = new FixedPointVector(c);
+    const ac = new Vector(c);
     ac.sub(a);
 
     return ab[1] * ac[0] - ab[0] * ac[1];
@@ -21,9 +21,9 @@ export default class Triangle {
 
   draw(screenCoordinates, color) {
     // get screen coordinates for this triangle
-    const va = new FixedPointVector(screenCoordinates[this.va]);
-    const vb = new FixedPointVector(screenCoordinates[this.vb]);
-    const vc = new FixedPointVector(screenCoordinates[this.vc]);
+    const va = screenCoordinates[this.va];
+    const vb = screenCoordinates[this.vb];
+    const vc = screenCoordinates[this.vc];
 
     const determinant = this.getDeterminant(va, vb, vc);
 
@@ -34,67 +34,50 @@ export default class Triangle {
     }
 
     // create bounding box around triangle
-    let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
-    let xmax = Math.max(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
-    let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
-    let ymax = Math.max(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+    let xmin = Math.trunc(Math.min(va[0], vb[0], vc[0]));
+    let xmax = Math.trunc(Math.max(va[0], vb[0], vc[0]));
+    let ymin = Math.trunc(Math.min(va[1], vb[1], vc[1]));
+    let ymax = Math.trunc(Math.max(va[1], vb[1], vc[1]));
 
-    // screen coordinates at the starting point (top left corner of bounding box, 0.5 pixels in)
-    const topLeft = new FixedPointVector(xmin + 0.5, ymin + 0.5, 0);
-
-    // calculate edge distances at starting point
-    const wLeft = new FixedPointVector();
-    wLeft[0] = this.getDeterminant(vb, vc, topLeft);
-    wLeft[1] = this.getDeterminant(vc, va, topLeft);
-    wLeft[2] = this.getDeterminant(va, vb, topLeft);
-
-    if (isLeftOrTopEdge(vb, vc)) wLeft[0] -= 1;
-    if (isLeftOrTopEdge(vc, va)) wLeft[1] -= 1;
-    if (isLeftOrTopEdge(va, vb)) wLeft[2] -= 1;
-
-    // find per pixel / per line deltas so we can calculate w incrementally
-    // note: we need to scale up deltas by the subpixel resolution since we
-    // only evaluate w once for each pixel/line
-    const dwdx = new FixedPointVector();
-    dwdx[0] = (vb[1] - vc[1]) << FixedPointVector.SHIFT;
-    dwdx[1] = (vc[1] - va[1]) << FixedPointVector.SHIFT;
-    dwdx[2] = (va[1] - vb[1]) << FixedPointVector.SHIFT;
-
-    const dwdy = new FixedPointVector();
-    dwdy[0] = (vb[0] - vc[0]) << FixedPointVector.SHIFT;
-    dwdy[1] = (vc[0] - va[0]) << FixedPointVector.SHIFT;
-    dwdy[2] = (va[0] - vb[0]) << FixedPointVector.SHIFT;
-
-    // index of first pixel in screen buffer
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
     // stride: change in raster buffer offsets from one line to next
     const imageStride = 4 * (this.buffer.width - (xmax - xmin));
 
-    // hold final w values here
-    const w = new FixedPointVector();
+    // w = edge distances
+    const w = new Vector();
+
+    // p = screen coordinates
+    const p = new Vector();
 
     for (let y = ymin; y < ymax; y++) {
-      w.copy(wLeft);
-
       for (let x = xmin; x < xmax; x++) {
-        if ((w[0] | w[1] | w[2]) > 0) {
+        p[0] = x + 0.5;
+        p[1] = y + 0.5;
+
+        w[0] = this.getDeterminant(vb, vc, p);
+        w[1] = this.getDeterminant(vc, va, p);
+        w[2] = this.getDeterminant(va, vb, p);
+
+        if (isLeftOrTopEdge(vb, vc)) w[0]--;
+        if (isLeftOrTopEdge(vc, va)) w[1]--;
+        if (isLeftOrTopEdge(va, vb)) w[2]--;
+
+        if (w[0] > 0 && w[1] > 0 && w[2] > 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];
           this.buffer.data[imageOffset + 3] = 255;
         }
         imageOffset += 4;
-        w.sub(dwdx);
       }
       imageOffset += imageStride;
-      wLeft.add(dwdy);
     }
   }
 }
 
 function isLeftOrTopEdge(start, end) {
-  const edge = new FixedPointVector(end);
+  const edge = new Vector(end);
   edge.sub(start);
   if (edge[1] < 0 || (edge[1] == 0 && edge[0] > 0)) return true;
 }

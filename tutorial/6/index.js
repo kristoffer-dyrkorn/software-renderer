@@ -34,9 +34,6 @@ const blueColor = new Vector(100, 180, 240);
 
 const center = new Vector(110, 70, 0);
 
-let frameCounter = 0;
-let triangleDrawTime = 0;
-
 draw();
 
 function resize() {
@@ -70,13 +67,7 @@ function draw() {
 
   screenBuffer.data.fill(0);
 
-  let start = performance.now();
   greenTriangle.draw(rotatedVertices, greenColor);
-  triangleDrawTime += performance.now() - start;
-
-  if (frameCounter % 100 == 0) {
-    console.log(`Triangle time: ${(triangleDrawTime / frameCounter).toFixed(2)} ms`);
-  }
 
   if (drawBlue) {
     blueTriangle.draw(rotatedVertices, blueColor);
@@ -85,7 +76,6 @@ function draw() {
   ctx.putImageData(screenBuffer, 0, 0);
 
   angle += angleSpeed;
-  frameCounter++;
   rotate();
 }
 

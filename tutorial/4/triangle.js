@@ -19,7 +19,7 @@ export default class Triangle {
     return ab[1] * ac[0] - ab[0] * ac[1];
   }
 
-  draw(screenCoordinates, color) {
+  draw(screenCoordinates, color, fillRule) {
     // get screen coordinates for this triangle
     const va = screenCoordinates[this.va];
     const vb = screenCoordinates[this.vb];
@@ -34,10 +34,10 @@ export default class Triangle {
     }
 
     // create bounding box around triangle
-    let xmin = Math.trunc(Math.min(va[0], vb[0], vc[0]));
-    let xmax = Math.trunc(Math.max(va[0], vb[0], vc[0]));
-    let ymin = Math.trunc(Math.min(va[1], vb[1], vc[1]));
-    let ymax = Math.trunc(Math.max(va[1], vb[1], vc[1]));
+    let xmin = Math.min(va[0], vb[0], vc[0]);
+    let xmax = Math.max(va[0], vb[0], vc[0]);
+    let ymin = Math.min(va[1], vb[1], vc[1]);
+    let ymax = Math.max(va[1], vb[1], vc[1]);
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
@@ -52,18 +52,20 @@ export default class Triangle {
 
     for (let y = ymin; y < ymax; y++) {
       for (let x = xmin; x < xmax; x++) {
-        p[0] = x + 0.5;
-        p[1] = y + 0.5;
+        p[0] = x;
+        p[1] = y;
 
         w[0] = this.getDeterminant(vb, vc, p);
         w[1] = this.getDeterminant(vc, va, p);
         w[2] = this.getDeterminant(va, vb, p);
 
-        if (isLeftOrTopEdge(vb, vc)) w[0]--;
-        if (isLeftOrTopEdge(vc, va)) w[1]--;
-        if (isLeftOrTopEdge(va, vb)) w[2]--;
+        if (fillRule) {
+          if (isLeftOrTopEdge(vb, vc)) w[0]--;
+          if (isLeftOrTopEdge(vc, va)) w[1]--;
+          if (isLeftOrTopEdge(va, vb)) w[2]--;
+        }
 
-        if (w[0] > 0 && w[1] > 0 && w[2] > 0) {
+        if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];
