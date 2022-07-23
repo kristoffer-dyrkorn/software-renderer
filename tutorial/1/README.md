@@ -29,7 +29,7 @@ The first assumption could be to test all points on screen, but we can do better
 
 In code, finding the bounding box looks like this:
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b194285ec7bc39a976a7fcbd54/tutorial/3/triangle.js#L36-L40
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b194285ec7bc39a976a7fcbd54/tutorial/3/triangle.js#L37-L40
 
 ## Drawing the triangle
 
