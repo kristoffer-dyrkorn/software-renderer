@@ -78,7 +78,7 @@ export default class Triangle {
       w.copy(wLeft);
 
       for (let x = xmin; x < xmax; x++) {
-        if ((w[0] | w[1] | w[2]) > 0) {
+        if ((w[0] | w[1] | w[2]) >= 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];

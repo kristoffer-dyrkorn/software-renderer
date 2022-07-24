@@ -26,4 +26,4 @@ The rest of the code stays the same. Note that although the bounding box has int
 
 Here is the result - two triangles in smooth rotation. This looks good!
 
-But wait - there are gaps between the triangles. What is going on? Read all about it in the next section!
+But wait - there is something wrong here - there is a singel-pixel gap that runs up an down the edge between the triangles. The fill rule is correct and we use floating point numbers - double precision numbers, even. What is wrong? Read all about it in the next section!
