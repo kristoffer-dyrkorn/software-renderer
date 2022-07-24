@@ -5,7 +5,7 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 let screenBuffer;
-let drawBlue = false;
+let drawBlue = true;
 
 let angle = 0;
 let angleSpeed = 0.15;

@@ -63,7 +63,7 @@ export default class Triangle {
         if (isLeftOrTopEdge(vc, va)) w[1] -= 1;
         if (isLeftOrTopEdge(va, vb)) w[2] -= 1;
 
-        if (w[0] > 0 && w[1] > 0 && w[2] > 0) {
+        if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];
@@ -77,7 +77,7 @@ export default class Triangle {
 }
 
 function isLeftOrTopEdge(start, end) {
-  const edge = new Vector(end);
+  const edge = new FixedPointVector(end);
   edge.sub(start);
   if (edge[1] > 0 || (edge[1] == 0 && edge[0] < 0)) return true;
 }
