@@ -12,7 +12,7 @@ Here, we create an array of vertex coordinates for three vertices in a triangle,
 
 The code relies on a `Vector` class that we use for coordinates, colors and other numbers that need to be grouped together.
 
-Note that we set the vertex indices in the constructor, and keep a separate array around for the vertex values themselves. This way the vertices can be moved around without impacting the structure of the triangle. We will return to this later when we will start animating our triangles.
+Note that we set the vertex indices in the constructor, and keep a separate array around for the vertex values themselves. This way the vertices can be moved around without impacting the overall definition of a triangle - that it consists of three vertices. We will return to this later when we will start animating our triangles.
 
 Also see that the vertices are specified in counterclockwise order, as mentioned in the first section.
 
