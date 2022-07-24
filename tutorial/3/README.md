@@ -22,7 +22,7 @@ Let's have a look at the start of the triangle drawing method - ie the actual ra
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/3beb537f0a38efd3c03868c0f9d4805f4521af66/tutorial/3/triangle.js#L22-L34
 
-The first step is to read out the actual coordinates (passed along in the parameter) using the indices that were previously provided in the constructor. We name the three vertices `va`, `vb` and `vc`. They are three-dimensional `Vector`s that have x, y and z coordinates. (For now we set all z coordinates to zero.)
+The first step is to read out the actual coordinates (passed along in the parameter) using the indices that were previously provided in the constructor. We name the three vertices `va`, `vb` and `vc`. They are three-dimensional `Vector`s that have x, y and z coordinates. (For now all z coordinates are zero.)
 
 We calculate the determinant value based on the three vertices. The value will be negative if the triangle is has clockwise ordering (something which will happen if it is back-facing). In that case, we don't draw anything. Also, we don't draw anything if the determinant is zero - which means that the triangle has zero area (something that might happen if a triangle is rotated 90 degrees to its side in three-dimensional space).
 
