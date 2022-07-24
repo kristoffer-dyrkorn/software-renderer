@@ -2,7 +2,7 @@
 
 In this section, we will draw a triangle on the screen - using the principles we have learned in section 1, and the setup code in section 2.
 
-## The application
+## The application code
 
 Let's get started. Take a look at this code:
 
@@ -16,7 +16,7 @@ Note that we set the vertex indices in the constructor, and keep a separate arra
 
 Also see that the vertices are specified in counterclockwise order, as mentioned in the first section.
 
-## The triangle
+## The triangle code
 
 Let's have a look at the start of the triangle drawing method - ie the actual rasterizer:
 
