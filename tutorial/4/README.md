@@ -30,7 +30,7 @@ An edge is a left edge if the change in y coordinate, when moving from the end a
 
 This formulation of the rule relies heavily on two conventions we have set up in our code: That the vertices in a visible triangle have counterclockwise order, and that the positive y axis points down. If those hold, this rule will work as intended.
 
-(As a side note: We could have chosen the opposite, and defined a "bottom right" rule, and that would be equally correct. The point is to have a rule that consistently sorts out pixels on shared edges, and the "top left" has just become the standard in computer graphics.)
+(A side note: We could have chosen the opposite convention, and defined a "bottom right" rule, and that would be equally correct. The point is to have a rule that consistently separates pixels that lie on shared edges, and the "top left" rule has just become the standard in computer graphics.)
 
 Now we have defined the rule, but what do we do with it?
 
