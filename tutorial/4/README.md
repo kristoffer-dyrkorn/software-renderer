@@ -26,7 +26,7 @@ The rule is often called the "top left" fill rule, and can be implemented like t
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/205ad80d4450d8d735ac9f0b3349031e678838b3/tutorial/4/triangle.js#L81-L85
 
-An edge is a left edge if the change in y coordinate, when moving from the end and to the start of the edge, is less than zero. It is a flat top edge if the change in y coordinate is zero and the change in x is negative.
+An edge is a left edge if the change in y coordinate, when moving from the end and to the start of the edge, is larger than zero. It is a flat top edge if the change in y coordinate is zero and the change in x is negative.
 
 This formulation of the rule relies heavily on two conventions we have set up in our code: That the vertices in a visible triangle have counterclockwise order, and that the positive y axis points down. If those hold, this rule will work as intended.
 
