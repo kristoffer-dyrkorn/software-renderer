@@ -38,9 +38,7 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/3beb537f0a38efd3c03
 
 We are now at the heart of the rasterizer. We loop through all pixels inside the bounding box and calculate three different determinants - each of them based on two triangle vertices in turn, and the current pixel as the last vertex.
 
-We store the determinant values in a vector `w`. If all three w components are larger than - or equal to - zero, the pixel will lie inside the triangle, and we write RGB and transparency values (the value 255 means "not transparent") to the specified offsets in the pixel buffer - before updating the offsets for the next iterations of the two loops.
-
-For now, we consider a determinant value of zero to mean that the pixel belongs to the triangle. The determinant can also be seen as an edge distance function as it will have a value that scales proportionally with the distance from a triangle edge to a candidate point. We will use that property of the determinant value later on.
+We store the determinant values in a vector `w`. If all three w components are larger than - or equal to - zero, the pixel will belong to the triangle, and we write RGB and transparency values (the value 255 means "not transparent") to the specified offsets in the pixel buffer - before updating the offsets for the next iterations of the two loops.
 
 Now - the result looks like this:
 
