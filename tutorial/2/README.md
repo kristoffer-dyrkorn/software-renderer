@@ -16,7 +16,7 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/c7b5a0ab1c164c96bd8
 
 As the `devicePixelRatio` variable here might reveal: These properties decide the resolution of the drawing surface. That is, the number of pixels it will contain - horizontally and vertically. In the normal case, you would like to read out the `window.devicePixelRatio` property to use that to set high DPI resolution for your canvas.
 
-However, when we are drawing triangles it is nice to have a low resolution surface, where each pixel is large, so we more easily can see what is going on. After some experimenting, it turns out that a `devicePixelRatio` of 0.2 is a suitable value.
+However, when we are drawing triangles it is nice to have a low resolution surface, where each pixel is large, so we can see more easily what is going on. After some experimenting, it turns out that a `devicePixelRatio` of 0.2 is a suitable value.
 
 Should you want to set the _size_ of the element itself, in the browser window, you use CSS. In JavaScript:
 
