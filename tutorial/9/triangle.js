@@ -94,7 +94,7 @@ export default class Triangle {
 }
 
 function isLeftOrTopEdge(start, end) {
-  const edge = new FixedPointVector(end);
+  const edge = new Vector(end);
   edge.sub(start);
-  if (edge[1] < 0 || (edge[1] == 0 && edge[0] > 0)) return true;
+  if (edge[1] > 0 || (edge[1] == 0 && edge[0] < 0)) return true;
 }
