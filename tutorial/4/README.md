@@ -34,13 +34,9 @@ This formulation of the rule relies heavily on two conventions we have set up in
 
 Now we have defined the rule, but what do we do with it?
 
-An easy way to skip drawing pixels on an edge is to adjust the determinant value for that edge. So we nudge the determinant with a small value, for example 1, when an edge is affected by the fill rule.
+An easy way to skip drawing pixels on an edge is to adjust the determinant value for pixels on that edge. So we nudge the determinant with a small value when an edge is affected by the fill rule. The value of 1 is chosen somewhat arbitrarily here - the point is just to shift the determinant value enough for this pixel so that it influences the test directly after.
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/056d879bd79b618800b64e8947c485b78140b8a5/tutorial/4/triangle.js#L63-L65
-
-The fill rule means we will, at times, skip drawing left and top pixels for a given triangle. We must then make sure that the bounding box for neighbour triangles (to the left and to the top) cover those pixels, so the determinant also can be evaluated there. We therefore have to expand the bounding box a little bit:
-
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/252df4067f821f71c55edbca0b4d82cc43167187/tutorial/4/triangle.js#L37-L40
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/056d879bd79b618800b64e8947c485b78140b8a5/tutorial/4/triangle.js#L62-L73
 
 The rest of the code remains the same.
 

@@ -30,11 +30,11 @@ The next step is to find the minimum and maximum coordinates for the vertices - 
 
 Then we define two `Vector`s, one to hold a variable `w` (explained in the next section) and one `p` that holds the x- and y-coordinates of the current pixel.
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/3beb537f0a38efd3c03868c0f9d4805f4521af66/tutorial/3/triangle.js#L36-L51
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/a7d72c0481f796fc774bee6c2019613997589b46/tutorial/3/triangle.js#L37-L51
 
 The code that follow looks like this:
 
-https://github.com/kristoffer-dyrkorn/software-renderer/blob/3beb537f0a38efd3c03868c0f9d4805f4521af66/tutorial/3/triangle.js#L53-L72
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/a7d72c0481f796fc774bee6c2019613997589b46/tutorial/3/triangle.js#L53-L72
 
 We are now at the heart of the rasterizer. We loop through all pixels inside the bounding box and calculate three different determinants - each of them based on two triangle vertices in turn, and the current pixel as the last vertex.
 
