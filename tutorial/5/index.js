@@ -66,6 +66,8 @@ function draw() {
   requestAnimationFrame(draw);
 
   screenBuffer.data.fill(0);
+  rotate();
+
   greenTriangle.draw(rotatedVertices, greenColor);
 
   if (drawBlue) {
@@ -73,9 +75,7 @@ function draw() {
   }
 
   ctx.putImageData(screenBuffer, 0, 0);
-
   angle += angleSpeed;
-  rotate();
 }
 
 function toggle(keyEvent) {

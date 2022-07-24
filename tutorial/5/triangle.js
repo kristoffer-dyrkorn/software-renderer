@@ -35,9 +35,9 @@ export default class Triangle {
 
     // create bounding box around triangle
     let xmin = Math.min(va[0], vb[0], vc[0]);
-    let xmax = Math.max(va[0], vb[0], vc[0]);
+    let xmax = Math.max(va[0], vb[0], vc[0]) + 1;
     let ymin = Math.min(va[1], vb[1], vc[1]);
-    let ymax = Math.max(va[1], vb[1], vc[1]);
+    let ymax = Math.max(va[1], vb[1], vc[1]) + 1;
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
@@ -63,7 +63,7 @@ export default class Triangle {
         if (isLeftOrTopEdge(vc, va)) w[1]--;
         if (isLeftOrTopEdge(va, vb)) w[2]--;
 
-        if (w[0] > 0 && w[1] > 0 && w[2] > 0) {
+        if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];
           this.buffer.data[imageOffset + 2] = color[2];
