@@ -5,7 +5,7 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 let screenBuffer;
-let drawBlue = false;
+let drawBlue = true;
 
 let angle = 0;
 let angleSpeed = 0.15;
@@ -47,7 +47,7 @@ function resize() {
   screenBuffer = ctx.createImageData(window.innerWidth * devicePixelRatio, window.innerHeight * devicePixelRatio);
 }
 
-function rotate() {
+function rotate(angle) {
   const DEG_TO_RAD = Math.PI / 180;
 
   for (let i = 0; i < 4; i++) {
@@ -65,9 +65,8 @@ function rotate() {
 function draw() {
   requestAnimationFrame(draw);
 
+  rotate(angle);
   screenBuffer.data.fill(0);
-  rotate();
-
   greenTriangle.draw(rotatedVertices, greenColor);
 
   if (drawBlue) {
