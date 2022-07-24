@@ -33,11 +33,11 @@ export default class Triangle {
       return;
     }
 
-    // create bounding box around triangle
-    let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
-    let xmax = Math.max(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
-    let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
-    let ymax = Math.max(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+    // create bounding box around triangle, round off fixed point values to integers
+    let xmin = (Math.min(va[0], vb[0], vc[0]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    let ymin = (Math.min(va[1], vb[1], vc[1]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    let ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
 
     // screen coordinates at the starting point (top left corner of bounding box, 0.5 pixels in)
     const topLeft = new FixedPointVector(xmin + 0.5, ymin + 0.5, 0);

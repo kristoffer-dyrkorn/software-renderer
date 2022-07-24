@@ -33,11 +33,11 @@ export default class Triangle {
       return;
     }
 
-    // create bounding box around triangle
-    let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
-    let xmax = Math.max(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
-    let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
-    let ymax = Math.max(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+    // create bounding box around triangle, round off fixed point values to integers
+    let xmin = (Math.min(va[0], vb[0], vc[0]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    let ymin = (Math.min(va[1], vb[1], vc[1]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    let ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
@@ -52,6 +52,7 @@ export default class Triangle {
 
     for (let y = ymin; y < ymax; y++) {
       for (let x = xmin; x < xmax; x++) {
+        // no need to round off - since we multiply by 2^n (n>0) we will get an integer
         p[0] = (x + 0.5) * FixedPointVector.MULTIPLIER;
         p[1] = (y + 0.5) * FixedPointVector.MULTIPLIER;
 

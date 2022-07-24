@@ -32,4 +32,4 @@ If you look at the animation smoothness at various subpixel resolutions, there a
 
 Choosing 4 bits means we multiply incoming floating point numbers by 2^4 = 16 before rounding off to an integer. To get from a fixed point representation back to a normal number (an integer) we shift right by 4 places.
 
-All of our needed operations is implemented in a class called FixedPointVector, we will not go through the code there now. However, in the next section we will look at how we convert the code from using floating point numbers to fixed point numbers.
+All of our needed operations is implemented in the class `FixedPointVector`, and we will not go through that code now. However, in the next section we will look at how we convert the rasterizer code from using floating point numbers to using the fixed point representation.
