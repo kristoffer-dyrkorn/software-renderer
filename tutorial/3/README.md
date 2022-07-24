@@ -8,7 +8,7 @@ Let's get started. Take a look at this code:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/3beb537f0a38efd3c03868c0f9d4805f4521af66/tutorial/3/index.js#L13-L23
 
-Here, we set vertex coordinates for three vertices in a triangle, define indices to those points, instantiate a `Triangle` object, define a color by its RGB values, and draw the triangle using the vertex coordinate array and the color.
+Here, we create an array of vertex coordinates for three vertices in a triangle, define indices to those vertices, instantiate a `Triangle` object, define a color by its RGB values, and draw the triangle using the vertex coordinate array and the color.
 
 The code relies on a `Vector` class that we use for coordinates, colors and other numbers that need to be grouped together.
 
