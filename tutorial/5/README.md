@@ -10,7 +10,7 @@ We start by keeping our existing vertex coordinate array as it is. In addition, 
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/7f0eaec2299ea9dd6d96aabbbd9bf400f8c74a6c/tutorial/5/index.js#L24
 
-To rotate the vertices, we first move them so they are centered around origo, then do the rotation, and then move them back to they originally were centered. Then we write them to the array of rotated vertices.
+To rotate the vertices, we first move them so they are centered around origo, then do the rotation, and then move them back to they originally were centered. Then we round them to the nearest pixel coordinate, and write them to the array of rotated vertices.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/a654c06f3c567165f98ac53926677728d02c2004/tutorial/5/index.js#L50-L63
 
@@ -22,6 +22,6 @@ We also use the `requestAnimationFrame` method to synchronise the drawing and ro
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/a654c06f3c567165f98ac53926677728d02c2004/tutorial/5/index.js#L65-L78
 
-We are now ready to inspect the result. Not bad - the triangles are indeed rotating, but notice: The movement is not smooth - the vertices jump here and there as they move.
+We are now ready to inspect the result. Not bad - the triangles are indeed rotating, but notice: The movement is not smooth - the triangles jump here and there as they rotate.
 
 This can be improved, check out the next section!
