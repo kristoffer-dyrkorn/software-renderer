@@ -50,7 +50,7 @@ function resize() {
   screenBuffer = ctx.createImageData(window.innerWidth * devicePixelRatio, window.innerHeight * devicePixelRatio);
 }
 
-function rotate() {
+function rotate(angle) {
   const DEG_TO_RAD = Math.PI / 180;
 
   for (let i = 0; i < 4; i++) {
@@ -68,6 +68,7 @@ function rotate() {
 function draw() {
   requestAnimationFrame(draw);
 
+  rotate(angle);
   screenBuffer.data.fill(0);
 
   let start = performance.now();
@@ -86,7 +87,6 @@ function draw() {
 
   angle += angleSpeed;
   frameCounter++;
-  rotate();
 }
 
 function toggle(keyEvent) {

@@ -22,14 +22,14 @@ If we assume the x and y screen coordinates will be in the range 0..2048, the in
 
 Why are we doing this? What is the relation between fixed point numbers and our pixels on screen?
 
-In short, when we use fixed point numbers for screen coordinates we subdivide each whole pixel into subpixels. The integer part of the number matches the whole pixels, an the fractional part matches the subpixels.
+It is here useful to mention the concept of subpixels. Each whole pixel we see on screen can be divided into smaller invisible parts, subpixels. And using fixed point coordinates lets us adress each subpixel individually and exactly. The integer part of a fixed point number maps to whole pixels, and the fractional part maps to subpixels.
 
-This means we create a larger resolution "invisible grid" of the screen, and perform precise integer calculations on that grid while keeping all drawing operations running on the normal pixel grid. Moreover, all incoming floating point coordinates undergo the same quantization step, where we snap the incoming values to subpixel values. This gives us consistency, which leads to correct separations of triangle edges.
+Another way to look at it is that we create a larger resolution "invisible grid" of the screen, and perform precise integer calculations on that grid while keeping all our drawing operations running on the normal pixel grid. Also, all incoming floating point coordinates undergo the same quantization step when converted to fixed point numbers - they are snapped to their nearest subpixel. This gives us consistency, which leads to correct separations of triangle edges.
 
-By using fixed point numbers, we can 1) keep the smooth movements, 2) avoid gaps and overlaps and 3) use efficient integer operations.
+THis way we can 1) keep the smooth movements, 2) avoid gaps and overlaps and 3) use efficient integer operations.
 
-If you look at the animation smoothness at various subpixel resolutions, there are few noticeable improvements past 4 bits for the fractional part. So we have chosen that here. (The standard for GPUs nowadays seems to be 8 bits.)
+If we look at our application, and consider the smoothness of the animation at various subpixel resolutions, there are few noticeable improvements past 4 bits for the fractional part. So we have chosen that subpixel resolution here. (The standard for GPUs nowadays seems to be 8 bits.)
 
 Choosing 4 bits means we multiply incoming floating point numbers by 2^4 = 16 before rounding off to an integer. To get from a fixed point representation back to a normal number (an integer) we shift right by 4 places.
 
-All of our needed operations is implemented in the class `FixedPointVector`, and we will not go through that code now. However, in the next section we will look at how we convert the rasterizer code from using floating point numbers to using the fixed point representation.
+All of the needed fixed point operations is implemented in the class `FixedPointVector`, and we will not go through that code here. However, in the next section we will look at how we convert the rasterizer code from using floating point numbers to using the fixed point representation.
