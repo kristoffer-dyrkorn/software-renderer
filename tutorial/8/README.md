@@ -2,22 +2,32 @@
 
 In this section, we will convert the rasterizer to use fixed point coordinates. We have already implemented a `FixedPointVector` class to help us, so the walkthrough here only considers the changes to the application and to the rasterizer itself.
 
-When calculating the determinant we now refer to input vectors as `FixedPointVectors`. Apart from that there are no changes - the two vector classes have the same APIs.
+When calculating the determinant we now refer to input vectors as `FixedPointVectors`. Apart from that, there are no changes - the two vector classes have the same APIs.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L12-L20
 
-Likewise, for the start of the triangle draw method, we convert the floating point screen coordinates to fixed point coordinates:
+At the start of the triangle draw method, we convert the incoming floating point screen coordinates to fixed point coordinates by using the built-in constructor in `FixedPointVectors`:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L22-L34
 
-When we create the bounding box, we no longer have the `Math.floor()` and `Math.ceil()` functions avaiable, so we round the values up and down manually when we convert from fixed point to normal numbers:
+When we create the bounding box, we no longer have the `Math.floor()` and `Math.ceil()` functions avaiable, so we round the values up and down manually when we convert from fixed point numbers to normal integers:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L36-L40
 
-Also, our `w` vector and the candidate point vector needs to be represented using fixed points:
+Also, our `w` vector and the candidate point vector `p` needs to be represented using fixed points:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L47-L57
 
-The final part is to update the fill rule function to operate on fixed point numbers. Again, the APIs of the two vector classes are the same, so the change is very small.
+The final part is to update the fill rule to operate on fixed point numbers. Again, the APIs of the two vector classes are the same, so the change is very small.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L80-L84
+
+And that is all that's needed in the rasterizer! Sweet! We now have a fully working and correct rasterizer that gives us smooth animation, due to its support for subpixel resolution.
+
+However, the code is not particularly fast. Let's add some simple timing code around the triangle draw function in the application code:
+
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/cbb603d3bb5c0b3f34d6a72030bc900f61f8cd39/tutorial/8/index.js#L74-L80
+
+When running the code on my machine, drawing the green triangle takes around 2.3 ms. That is a lot. Each triangle is small (remember, we are working at low resolution), but still we cannot draw more than around 7 of those on screen before reaching the frame time limit and the animation start stuttering. (60 frames per second means we have 16.7 ms per frame available.)
+
+The profiler in my browser tells me that we spend a lot of time calculating determinants, evaluating fill rules and instantiating `FixedPointVectors`. Could we speed up our code? Yes we can! In the next section we will do just that.
