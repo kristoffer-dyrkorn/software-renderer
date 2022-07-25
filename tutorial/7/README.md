@@ -26,7 +26,7 @@ It is here useful to mention the concept of subpixels. Each whole pixel we see o
 
 Another way to look at it is that we create a larger resolution "invisible grid" of the screen, and perform precise integer calculations on that grid while keeping all our drawing operations running on the normal pixel grid. Also, all incoming floating point coordinates undergo the same quantization step when converted to fixed point numbers - they are snapped to their nearest subpixel. This gives us consistency, which leads to correct separations of triangle edges.
 
-THis way we can 1) keep the smooth movements, 2) avoid gaps and overlaps and 3) use efficient integer operations.
+This way we can 1) keep the smooth movements, 2) avoid gaps and overlaps and 3) use efficient integer operations.
 
 If we look at our application, and consider the smoothness of the animation at various subpixel resolutions, there are few noticeable improvements past 4 bits for the fractional part. So we have chosen that subpixel resolution here. (The standard for GPUs nowadays seems to be 8 bits.)
 

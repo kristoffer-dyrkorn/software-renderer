@@ -24,6 +24,10 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd6512
 
 And that is all that's needed in the rasterizer! Sweet! We now have a fully working and correct rasterizer that gives us smooth animation, due to its support for subpixel resolution.
 
+If you want to test out various subpixel resolutions and see the effects yourself, you can adjust the value of the `FixedPointVector.SHIFT` constant. Try out values like 0 (no subpixels), 1, 2, 4, and 8 for example.
+
+https://github.com/kristoffer-dyrkorn/software-renderer/blob/b7ce1d928676e212d4ac458807b5fbd6e686862e/tutorial/lib/fixedpointvector.js#L59
+
 However, the code is not particularly fast. Let's add some simple timing code around the triangle draw function in the application code:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/cbb603d3bb5c0b3f34d6a72030bc900f61f8cd39/tutorial/8/index.js#L74-L80
