@@ -32,6 +32,6 @@ However, the code is not particularly fast. Let's add some simple timing code ar
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/cbb603d3bb5c0b3f34d6a72030bc900f61f8cd39/tutorial/8/index.js#L74-L80
 
-When running the code on my machine, drawing the green triangle takes around 2.3 ms. That is a lot. Each triangle is small (remember, we are working at low resolution), but still we cannot draw more than around 7 of those on screen before reaching the frame time limit and the animation start stuttering. (60 frames per second means we have 16.7 ms per frame available.)
+When running the code on my machine, drawing the green triangle takes around 2.3 ms. That is a lot. Each triangle is small (remember, we are working at low resolution), but still we will not be able to draw more than around 7 of those on screen before reaching the frame time limit - where the animation will start stuttering. (The browser draws 60 frames per second, which means we have 16.7 ms per frame available.)
 
 The profiler in my browser tells me that we spend a lot of time calculating determinants, evaluating fill rules and instantiating `FixedPointVectors`. Could we speed up our code? Yes we can! In the next section we will do just that.
