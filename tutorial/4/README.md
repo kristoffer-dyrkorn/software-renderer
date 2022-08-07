@@ -36,9 +36,11 @@ This way of expressing the rule depends on two conventions we have follow in our
 
 Now that we have defined the rule, what do we do with it? How do we express that pixels on the edges that match the rule do not belong to this triangle?
 
-We need to make an exception: We will skip the pixels that - according to this new rule - don't belong to the triangle after all. An easy way to do so is to adjust the determinant value. So, whenever an edge is affected by the fill rule, we nudge the determinant for that edge with a small amount. The value 1 is chosen somewhat arbitrarily - the point is to make the determinant value for this edge, in this triangle, differ from the determinant value calculated when the rasterizer works on the same edge in the neighbour triangle.
+When drawing pixels, we need to make an exception: We will skip those pixels that - according to this new rule - don't belong to the triangle after all. An easy way to do so is to adjust the determinant value. So, whenever an edge is affected by the fill rule, we nudge the determinant for that edge with a small amount. A value of 1 is chosen somewhat arbitrarily - the point is to make the determinant value for this edge, in the current triangle, differ from the determinant value calculated when the rasterizer hits the same edge in the neighbour triangle. This way we create a separation between the two triangles so that pixels exactly on the edge belong to only one triangle and are thus drawn only once.
 
-In a sense, what we are doing here is to nudge affected edges towards their triangle center. We don't want the nudging to introduce visual artifacts, so the value should be as small as possible - but still large enough to consistently break the tie.
+In a sense, what we are doing here is to nudge affected edges a little bit towards their triangle center. We need to nudge by only a small amount, large adjustment values will make the triangles visibly shrink. However, the value still needs to be large enough to break the tie in a consistent manner, which can be expressed like this: It must make the determinant value less than zero for all pixels that lie exactly on affected edges within the current triangle.
+
+So, now we know what to look for in an adjustment value, but we still don't know what will be a _correct_ value. It turns out that the topic is a bit complicated, and for now we will not go into more details here. Instead, we will return to the subject later on in this tutorial, and for now a value of 1 works perfectly well.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/056d879bd79b618800b64e8947c485b78140b8a5/tutorial/4/triangle.js#L62-L73
 

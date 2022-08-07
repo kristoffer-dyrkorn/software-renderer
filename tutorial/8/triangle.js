@@ -52,7 +52,9 @@ export default class Triangle {
 
     for (let y = ymin; y < ymax; y++) {
       for (let x = xmin; x < xmax; x++) {
-        // no need to round off - since we multiply by 2^n (n>0) we will get an integer
+        // there is no need to round off the result.
+        // the input is an integer, and although we add 0.5 to it,
+        // we then multiply by 2^n (n>0), which means the result will always be an integer
         p[0] = (x + 0.5) * FixedPointVector.MULTIPLIER;
         p[1] = (y + 0.5) * FixedPointVector.MULTIPLIER;
 

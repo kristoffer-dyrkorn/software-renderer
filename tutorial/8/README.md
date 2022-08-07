@@ -22,6 +22,8 @@ The final part is to update the fill rule to operate on fixed point numbers. Aga
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L80-L84
 
+But here there is an important change. Until now, the adjustment value has been 1. In the fixed point representation, a value of 1 represents the smallest possible difference between two numbers.
+
 And that is all that's needed in the rasterizer! Sweet! We now have a fully working and correct rasterizer that gives us smooth animation, due to its support for subpixel resolution.
 
 If you want to test out various subpixel resolutions and see the effects yourself, you can adjust the value of the `FixedPointVector.SHIFT` constant. Try out values like 0 (no subpixels), 1, 2, 4, and 8 for example.
