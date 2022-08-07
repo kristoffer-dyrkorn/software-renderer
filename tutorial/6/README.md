@@ -2,9 +2,11 @@
 
 In this section, we will improve the smoothness of the animation.
 
-So far, we have used only integer values when drawing things on screen. Rotating vertices will produce floating-point results, but we have rounded off everything to integer values before drawing our triangles. This means that we move vertices to the center of their nearest pixel. This also shifts the triangle edges, and the result is triangles that jump around as they rotate.
+So far, we have only used integer values when drawing things on screen. But, as we rotate our triangles, the new vertex coordinates will get non-integer values. We have - until now - rounded coordinates off to integers before sending them to the rasterizer. This means that all calculations inside the rasterizer are performed on shifted coordinate values. The result is that the triangles jump around as they rotate.
 
-One way to improve this is to introduce floating point values in our calculations. We still need to put pixels on the screen using integer coordinates (since that is the only coordinate type the screen buffer accepts), but we can do this without snapping vertices. That way the the vertex locations sent to the rasterizer are kept unmodified.
+One way to improve this is to base the calculations in the rasterizer directly on the floating point values from the rotated vertices.
+
+We still need to put pixels on the screen using integer coordinates, since that is the only way to address the screen buffer, but from now on we will do so without first shifting the coordinates. We will instead evalute candidate pixels in a different way. Let's have a look.
 
 ## The application code
 
@@ -14,22 +16,26 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/69c665e30005a3c41d3
 
 ## The triangle code
 
-In the rasterizer, we now receive floating point coordinates. However, the bounding box for the triangle must still be defined in integer coordinates, since that is what we base the pixel selection on. So we convert the incoming coordinates to integers by rounding off values, carefully choosing whether to round up or down. The point is to ensure that we end up with a bounding box having integer coordinates that enclose the entire triangle.
+In the rasterizer, we now receive floating point coordinates. However, we would still like our bounding box to be defined by integer coordinates. That way it is easier to calculate the final screen coordinates for pixel drawing. So, depending on whether we look at max or min values, we use rounding up or down to expand the bounding box to the nearest integer coordinates.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/9f51672b8e895df9a78725130e03d5471ba87b40/tutorial/6/triangle.js#L37-L40
 
-And now comes the important part: We no longer use integer values when calculating determinant values.
+Now comes the important part: We no longer use integer values when calculating the determinant values.
 
-The reason is that we now must treat the vertex coordinates - and thereby the coordinates along the edges - as continuous values. The vertex coordinates no longer refer to a location in a grid of integer values, instead the represent an idealized point in a continuous coordinate system. We still need to find out which pixels to draw on the screen, so we will have to somehow map the continuous vertex coordinates onto integer values that can be used as screen coordinates.
+The vertex coordinates used to be integers, and refer to a location in a grid of discrete values, but now they represent a point within a continuous two-dimensional space. The edges between vertices will also belong in this continuous space.
 
-The most common convention in computer graphics is to assume that a pixel covers a 1.0 by 1.0 area, and that pixel centers are placed at values n + 0.5, for integer n. Then, to find out whether a pixel is inside or outside a triangle, we loop through the bounding box integer values, and evaluate whether the pixel center (0.5 off the bounding box coordinate, along both axes) is inside or outside.
+How can ve convert this to integer coordinates for pixel drawing?
+
+We can imagine putting a grid, with a spacing of 1 by 1, on top of the continuous vertex space. The grid lines follow the integer values in the continuous space, and the grid cells represent pixels. This means that pixel centers are now located at (integer + 0.5) coordinates, for both axes.
+
+When we now draw a triangle, we loop through all integer coordinates inside the bounding box, and calculate the determinant value at pixel centers, ie at coordinates where we have added 0.5. So triangles will need to cover those locations for pixels to be drawn.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/9f51672b8e895df9a78725130e03d5471ba87b40/tutorial/6/triangle.js#L53-L76
 
-We choose to add 0.5 (and not subtract) so we don't have to deal with negative values for the left half of the leftmost pixel on screen. (See [this article](https://www.realtimerendering.com/blog/the-center-of-the-pixel-is-0-50-5/) for details.)
+We choose to add (and not subtract) 0.5 so we don't have to deal with negative values for the left half of the leftmost pixel on screen. (See [this article](https://www.realtimerendering.com/blog/the-center-of-the-pixel-is-0-50-5/) for details.)
 
-Put differently, we keep the vertex coordinates at their floating point resolution, calculate a bounding box around the triangle, and perform point sampling of the triangle at regular intervals - while still using floating point resolution. The sample results are determinant values, and this way we know which pixels to draw.
+To summarize: We keep the input vertex coordinates as they are, and calculate a bounding box having integer coordinates and that covers the triangle. We then calculate the determinant at each (integer + 0.5) location, and use this result to decide whether to draw a pixel or not. The effect is that the placement of the vertex coordinates inside their pixel grid cell (ie, the fractional values) are kept in consideration for all determinant calculations along the triangle edges. This results in better choices being made on whether or not to draw a pixel along a given triangle edge.
 
 Here is the result - two triangles in smooth rotation. This looks good!
 
-But wait - there is something wrong here - there is a singel-pixel gap that runs up and down the edge between the triangles. The fill rule is correct and we use floating point numbers - with double precision, even. What is wrong? Read all about it in the next section!
+But wait - there is something wrong here - there is a singel-pixel gap that runs up and down the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!

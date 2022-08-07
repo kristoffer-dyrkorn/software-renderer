@@ -2,18 +2,20 @@
 
 ## Floating-point numbers
 
-The rasterizer runs on floating point numbers. Unfortunately, floating point calculations are not exact. As we have seen, we can still get visual artifacts - even when using double-precision floats, which is the JavaScript [standard for numbers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number).
+The rasterizer now runs on floating point numbers, and uses the rotated vertex coordinates directly.
+The artifacts we see are gaps between triangles. Does this problem somehow involve the fill rule? Well, yes, it does. Until now we have used an adjustment value of 1, and that has consistently nudged the determinant values correctly, so that pixels are not overdrawn - and the triangles also have no gaps.
 
-The artifacts we saw were gaps between triangles. Does this problem somehow involve the fill rule? Well, yes, it does. Until now we have used an adjustment value of 1, and that has consistently nudged the determinant values so that pixels are not overdrawn - and without gaps.
+Now, with the higher resolution of floating point values, we do get gaps. It turns out the adjustment value is too large. We could look for a new smaller value and use that instead, but it seems it would be hard to find a right value. We have no guidance on how to find our value.
 
-Now, with the higher precision of floating point values, we get gaps. The adjustment value is too large.
-We could look for a new smaller value and use that instead, but it turns out that could be hard. Let's have a look at what the determinant value actually is.
+Let's have a look at what the determinant value actually is.
 
 Cross product, difference. Imprecision.
 near triangle edges the determinant will be small.
 Adjustment value is also small - and of same magnitude as the derminant itself.
 worst case scenario: subtraction of two small floating point values.
 the values involved in the calculations will depend on triangle sizes, and ensuring correct floating point operations in all cases (ie finding the magic value that always will make our adjustments correct) would be hard.
+
+- even when using double-precision floats, which is the JavaScript [standard for numbers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number).
 
 The solution here is to change the approach. The industry standard way to handle the problem is to use a different representation for numbers - one that will give exact results. Although correctness is the most important thing in a rasterizer, it is also inconvenient that the floating point operations usually take longer than their integer counterparts.
 
