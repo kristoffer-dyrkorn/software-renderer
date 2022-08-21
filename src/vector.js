@@ -81,6 +81,15 @@ export default class Vector extends Float32Array {
     this[3] = v[3];
   }
 
+  quantize(q) {
+    this.scale(q);
+    this[0] = Math.round(this[0]);
+    this[1] = Math.round(this[1]);
+    this[2] = Math.round(this[2]);
+    this[3] = Math.round(this[3]);
+    this.scale(1 / q);
+  }
+
   length() {
     return Math.sqrt(this[0] * this[0] + this[1] * this[1] + this[2] * this[2]);
   }

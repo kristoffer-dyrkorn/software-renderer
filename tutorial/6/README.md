@@ -38,4 +38,4 @@ To summarize: We keep the input vertex coordinates as they are, and calculate a 
 
 Here is the result - two triangles in smooth rotation. This looks good!
 
-But wait - there is something wrong here - there is a singel-pixel gap that runs up and down the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!
+But wait - there is something wrong here - there are singel-pixel gaps running up and down the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!

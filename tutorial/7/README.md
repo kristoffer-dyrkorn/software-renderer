@@ -2,7 +2,8 @@
 
 ## Floating-point numbers
 
-The rasterizer now runs on floating point numbers, and uses the rotated vertex coordinates directly.
+The rasterizer runs on floating point numbers, and uses the rotated vertex coordinates as input for determinant calculations.
+
 The artifacts we see are gaps between triangles. Does this problem somehow involve the fill rule? Well, yes, it does. Until now we have used an adjustment value of 1, and that has consistently nudged the determinant values correctly, so that pixels are not overdrawn - and the triangles also have no gaps.
 
 Now, with the higher resolution of floating point values, we do get gaps. It turns out the adjustment value is too large. We could look for a new smaller value and use that instead, but it seems it would be hard to find a right value. We have no guidance on how to find our value.

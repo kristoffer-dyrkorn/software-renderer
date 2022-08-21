@@ -1,4 +1,3 @@
-import Mesh from "./mesh.js";
 import Vector from "./vector.js";
 
 export default class Triangle {
@@ -90,7 +89,8 @@ export default class Triangle {
 
     // set up distance functions (interpolation weights) along the left edge of the bounding rectangle.
     // values are kept un-normalized (ie not divided by determinant of full triangle) to retain precision.
-    // [0] = distance from a to bc, [1] = from b to ca, [2] = from c to ab
+    // so these values are barycentric coordinates (0..1), multiplied by the determinant of the full triangle.
+    // wLeft[0] = distance from a to bc, wLeft[1] = from b to ca, wLeft[2] = from c to ab
     this.wLeft[0] = this.getDeterminant(vb, vc, this.p);
     this.wLeft[1] = this.getDeterminant(vc, va, this.p);
     this.wLeft[2] = this.getDeterminant(va, vb, this.p);
@@ -98,6 +98,10 @@ export default class Triangle {
     // calculate per pixel / per line deltas for incremental evaluation of distance function
     const dwdx = new Vector(vb[1] - vc[1], vc[1] - va[1], va[1] - vb[1]);
     const dwdy = new Vector(vb[0] - vc[0], vc[0] - va[0], va[0] - vb[0]);
+
+    //    this.wLeft.quantize(4);
+    //    dwdx.quantize(4);
+    //    dwdy.quantize(4);
 
     // trick: after perspective transform, the z distance from camera to vertex
     // is stored in the w coordinate. (The clip space and screen space transforms don't change it.)
@@ -109,14 +113,15 @@ export default class Triangle {
     // perspective correct z values are needed for correct texture mapping
     const zInverted = new Vector(1 / -va[3], 1 / -vb[3], 1 / -vc[3]);
 
-    // pre-multiply inverted z values at vertices by the inverse determinant (the normalization factor)
-    // so that this multiply is not needed when calculating each actual value.
-    // that would cost one multiply per pixel
+    // pre-multiply inverted z values at the vertices by 1 / determinant (1 / normalization factor)
+    // so that this multiply will not be needed when calculating each interpolated 1/z value - ie when dotting
+    // the inverted z values at the vertices with the *scaled* barycentric coordinates.
+    // thus we are saving one multiply per pixel
     zInverted.scale(invDeterminant);
 
-    // use projected z values for each vertex, range 1 (near plane) to 0 (far plane, at infinity)
-    // for z buffer calculations. the projection matrix defines the z range, and the matrix values
-    // are chosen to maximise numerical precision.
+    // use projected z values for each vertex. the projection matrix setup defines
+    // the z range, and the chosen matrix values maximise the numerical precision.
+    // the range of the projected z value is 1 (near plane) to 0 (far plane, at infinity)
     // see https://developer.nvidia.com/content/depth-precision-visualized
     const projectedZ = new Vector(va[2], vb[2], vc[2]);
     projectedZ.scale(invDeterminant);
@@ -170,6 +175,9 @@ export default class Triangle {
     for (let y = ymin; y < ymax; y++) {
       this.w.copy(this.wLeft);
 
+      // TODO Calculate pre-step (first triangle x) using deltas (see Delatin)
+      // Also consider breaking x loop (detect we have been inside, but aren't anymore)
+
       for (let x = xmin; x < xmax; x++) {
         if (this.w[0] > 0 && this.w[1] > 0 && this.w[2] > 0) {
           const zValue = projectedZ.dot(this.w);
@@ -191,7 +199,7 @@ export default class Triangle {
             nWeight = -this.n.dot(this.lightDirection);
             if (nWeight < 0) nWeight = 0;
 
-            // get interpolated 1/z value (based on the 1/z value at the vertices) for this point in the triangle
+            // get interpolated 1/z value (based on the 1/z values at each vertex) for this point in the triangle
             const interpolatedZInverted = zInverted.dot(this.w);
             // get actual, perspective correct z value
             const perspectiveZ = 1 / interpolatedZInverted;
@@ -201,10 +209,54 @@ export default class Triangle {
             const s = sDivZ.dot(this.w) * perspectiveZ;
             const t = tDivZ.dot(this.w) * perspectiveZ;
 
-            // read integer part of texture coordinate and look up pixel value
-            const tx = Math.floor(s * 255);
-            const ty = Math.floor(t * 255);
+            // TODO put perspectiveZ outside parenthesis?
+            /*
+
+y = t: tDivZ.dot(this.w) 
+x = s: sDivZ.dot(this.w)
+
+width * y + x
+
+----
+
+width * y + x:
+
+width * (fx + gy + hz)
++ ax + by + cz
+
+7 muls
+
+x * (a + f * width) + y * (b + g * width) + z * (c + h * width)
+
+6 muls
+
+put perspective z at the end to save another mul
+
+perspectiveZ * (x * (a + f * width) + y * (b + g * width) + z * (c + h * width))
+
+
+            index = trunc(3 * perspectiveZ * 255 * (t * width + s))
+
+<< does trunc!
+
+3.3 << 2 = 12!
+
+(but how is the performance?)
+
+Use |0 for conversion to integers
+use Math.imul(a,b) for multiplication (see MDN)
+
+http://speakingjs.com/es5/ch11.html#integers
+
+
+*/
+            // scale and truncate texture coordinates to get raster coordinates and look up pixel value
+            // TODO: Premultiply texture coordinates with texture image dimensions-1 to avoid multiplies here
+            const tx = Math.trunc(s * 255);
+            const ty = Math.trunc(t * 255);
             const index = 3 * ((ty << 8) + tx);
+
+            //const index = 0;
 
             buffer[imageOffset + 0] = textureMap[index] * nWeight;
             buffer[imageOffset + 1] = textureMap[index + 1] * nWeight;
