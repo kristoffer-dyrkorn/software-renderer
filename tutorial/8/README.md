@@ -14,7 +14,7 @@ When we create the bounding box, we no longer have the `Math.floor()` and `Math.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L36-L40
 
-Also, our `w` vector and the candidate point vector `p` needs to be represented using fixed points:
+Also, our `w` vector and the candidate point vector `p` need to be represented using fixed points:
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L47-L57
 
@@ -22,7 +22,7 @@ The final part is to update the fill rule to operate on fixed point numbers. Aga
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L80-L84
 
-But here there is an important change. Until now, the adjustment value has been 1. In the fixed point representation, a value of 1 represents the smallest possible difference between two numbers.
+But here there is an important change. Until now, the adjustment value has been 1. In the fixed point representation, a value of 1 represents the smallest possible difference between two numbers. Should we change the adjustment? It turns out that keeping the adjustment of 1 still makes the determinant consistently less than zero for pixels that lie exactly on an affected edge. So
 
 And that is all that's needed in the rasterizer! Sweet! We now have a fully working and correct rasterizer that gives us smooth animation, due to its support for subpixel resolution.
 
