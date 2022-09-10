@@ -33,7 +33,7 @@ export default class Triangle {
       return;
     }
 
-    // create bounding box around triangle, round off fixed point values to integers
+    // create bounding box around triangle, rounding off fixed point values to integers
     let xmin = (Math.min(va[0], vb[0], vc[0]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
     let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
     let ymin = (Math.min(va[1], vb[1], vc[1]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
@@ -50,8 +50,8 @@ export default class Triangle {
     // p = screen coordinates
     const p = new FixedPointVector();
 
-    for (let y = ymin; y < ymax; y++) {
-      for (let x = xmin; x < xmax; x++) {
+    for (let y = ymin; y <= ymax; y++) {
+      for (let x = xmin; x <= xmax; x++) {
         // there is no need to round off the result.
         // the input is an integer, and although we add 0.5 to it,
         // we then multiply by 2^n (n>0), which means the result will always be an integer

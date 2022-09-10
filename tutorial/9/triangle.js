@@ -74,10 +74,10 @@ export default class Triangle {
     // hold final w values here
     const w = new FixedPointVector();
 
-    for (let y = ymin; y < ymax; y++) {
+    for (let y = ymin; y <= ymax; y++) {
       w.copy(wLeft);
 
-      for (let x = xmin; x < xmax; x++) {
+      for (let x = xmin; x <= xmax; x++) {
         if ((w[0] | w[1] | w[2]) >= 0) {
           this.buffer.data[imageOffset + 0] = color[0];
           this.buffer.data[imageOffset + 1] = color[1];

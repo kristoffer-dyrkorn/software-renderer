@@ -34,10 +34,10 @@ export default class Triangle {
     }
 
     // create bounding box around triangle
-    let xmin = Math.floor(Math.min(va[0], vb[0], vc[0])) - 1;
-    let xmax = Math.ceil(Math.max(va[0], vb[0], vc[0])) + 1;
-    let ymin = Math.floor(Math.min(va[1], vb[1], vc[1])) - 1;
-    let ymax = Math.ceil(Math.max(va[1], vb[1], vc[1])) + 1;
+    let xmin = Math.floor(Math.min(va[0], vb[0], vc[0]));
+    let xmax = Math.ceil(Math.max(va[0], vb[0], vc[0]));
+    let ymin = Math.floor(Math.min(va[1], vb[1], vc[1]));
+    let ymax = Math.ceil(Math.max(va[1], vb[1], vc[1]));
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
@@ -50,8 +50,8 @@ export default class Triangle {
     // p = screen coordinates
     const p = new Vector();
 
-    for (let y = ymin; y < ymax; y++) {
-      for (let x = xmin; x < xmax; x++) {
+    for (let y = ymin; y <= ymax; y++) {
+      for (let x = xmin; x <= xmax; x++) {
         p[0] = x + 0.5;
         p[1] = y + 0.5;
 
