@@ -1,4 +1,4 @@
-# A fast and correct triangle rasterizer
+# Setting up the browser to draw pixels
 
 In this section, you will get to know the `<canvas>` element and how to set up the browser to draw individual pixels on the screen. This will set the stage for drawing actual triangles - which we will go through in the next section.
 

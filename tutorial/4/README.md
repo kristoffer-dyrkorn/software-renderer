@@ -1,4 +1,4 @@
-# A fast and correct triangle rasterizer
+# Moar triangles, moar problems
 
 In this section, we will take a closer look at what happens when we draw two triangles that share an edge. There are some important details that need to be resolved.
 

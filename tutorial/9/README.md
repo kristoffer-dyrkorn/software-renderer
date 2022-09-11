@@ -1,4 +1,4 @@
-# A fast and correct triangle rasterizer
+# Time to go incremental
 
 In this section we will improve the performance of the rasterizer. We would like to draw our triangles much faster so we can show and animate a lot of triangles on screen at the same time. Hopefully we can do this without making the code much more complicated or hard to read.
 

@@ -1,6 +1,6 @@
-# A fast and correct triangle rasterizer
+# One solution, but two new problems
 
-## Floating-point numbers: One solution, but two new problems
+## Floating-point numbers
 
 The rasterizer runs on floating point numbers, and uses the rotated vertex coordinates as input for the determinant calculations.
 

@@ -1,4 +1,4 @@
-# A fast and correct triangle rasterizer
+# Let's fix this
 
 In this section, we will convert the rasterizer to use fixed point coordinates. We have already implemented a `FixedPointVector` class to help us, so the walkthrough here only considers the changes to the application and to the rasterizer itself.
 

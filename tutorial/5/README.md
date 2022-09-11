@@ -1,4 +1,4 @@
-# A fast and correct triangle rasterizer
+# We've got to move it
 
 In this section, we will start animating our triangles - we will make them rotate on the screen!
 

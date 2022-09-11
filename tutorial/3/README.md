@@ -1,4 +1,4 @@
-# A fast and correct triangle rasterizer
+# The first, basic rasterizer
 
 In this section, we will _finally_ get to draw a triangle on the screen - using the method we have described in section 1, and the setup code from section 2.
 

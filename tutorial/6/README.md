@@ -1,4 +1,4 @@
-# A fast and correct triangle rasterizer
+# Let's go continuous!
 
 In this section, we will improve the smoothness of the animation.
 
