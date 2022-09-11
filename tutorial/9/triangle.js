@@ -33,13 +33,13 @@ export default class Triangle {
       return;
     }
 
-    // create bounding box around triangle, round off fixed point values to integers
-    let xmin = (Math.min(va[0], vb[0], vc[0]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
-    let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
-    let ymin = (Math.min(va[1], vb[1], vc[1]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
-    let ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    // create bounding box around triangle, expanding to nearest integer coordinates
+    let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
+    let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
+    let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+    let ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
 
-    // screen coordinates at the starting point (top left corner of bounding box, 0.5 pixels in)
+    // screen coordinates at the starting point (top left corner of bounding box, at pixel center)
     const topLeft = new FixedPointVector(xmin + 0.5, ymin + 0.5, 0);
 
     // calculate edge distances at starting point
@@ -48,9 +48,9 @@ export default class Triangle {
     wLeft[1] = this.getDeterminant(vc, va, topLeft);
     wLeft[2] = this.getDeterminant(va, vb, topLeft);
 
-    if (isLeftOrTopEdge(vb, vc)) wLeft[0] -= 1;
-    if (isLeftOrTopEdge(vc, va)) wLeft[1] -= 1;
-    if (isLeftOrTopEdge(va, vb)) wLeft[2] -= 1;
+    if (isLeftOrTopEdge(vb, vc)) wLeft[0]--;
+    if (isLeftOrTopEdge(vc, va)) wLeft[1]--;
+    if (isLeftOrTopEdge(va, vb)) wLeft[2]--;
 
     // find per pixel / per line deltas so we can calculate w incrementally
     // note: we need to scale up deltas by the subpixel resolution since we
@@ -69,7 +69,7 @@ export default class Triangle {
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
     // stride: change in raster buffer offsets from one line to next
-    const imageStride = 4 * (this.buffer.width - (xmax - xmin));
+    const imageStride = 4 * (this.buffer.width - (xmax - xmin) - 1);
 
     // hold final w values here
     const w = new FixedPointVector();
@@ -97,4 +97,5 @@ function isLeftOrTopEdge(start, end) {
   const edge = new FixedPointVector(end);
   edge.sub(start);
   if (edge[1] > 0 || (edge[1] == 0 && edge[0] < 0)) return true;
+  return false;
 }

@@ -33,11 +33,11 @@ export default class Triangle {
       return;
     }
 
-    // create bounding box around triangle, rounding off fixed point values to integers
-    let xmin = (Math.min(va[0], vb[0], vc[0]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
-    let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
-    let ymin = (Math.min(va[1], vb[1], vc[1]) - FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
-    let ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.ONE_HALF) >> FixedPointVector.SHIFT;
+    // create bounding box around triangle, expanding to nearest integer coordinates
+    let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
+    let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
+    let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+    let ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
@@ -62,9 +62,9 @@ export default class Triangle {
         w[1] = this.getDeterminant(vc, va, p);
         w[2] = this.getDeterminant(va, vb, p);
 
-        if (isLeftOrTopEdge(vb, vc)) w[0] -= 1;
-        if (isLeftOrTopEdge(vc, va)) w[1] -= 1;
-        if (isLeftOrTopEdge(va, vb)) w[2] -= 1;
+        if (isLeftOrTopEdge(vb, vc)) w[0]--;
+        if (isLeftOrTopEdge(vc, va)) w[1]--;
+        if (isLeftOrTopEdge(va, vb)) w[2]--;
 
         if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
           this.buffer.data[imageOffset + 0] = color[0];
@@ -83,4 +83,5 @@ function isLeftOrTopEdge(start, end) {
   const edge = new FixedPointVector(end);
   edge.sub(start);
   if (edge[1] > 0 || (edge[1] == 0 && edge[0] < 0)) return true;
+  return false;
 }

@@ -22,7 +22,7 @@ The final part is to update the fill rule to operate on fixed point numbers. Aga
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/5a919f2dfa5e6cd651286cf146bf504ab302e3cb/tutorial/8/triangle.js#L80-L84
 
-But here there is an important detail: In the early version of the rasterizer, where we used integer coordinates, the adjustment value was 1. Although we now use fixed point coordinates instead, we still want the adjustment value to be the same as the resolution of the numeric representation. And that is the value 1 - _in fixed point representation_. So although the code does not seem to have changed, the meaning of the number 1 has changed.
+But here there is an important detail: In the early version of the rasterizer, where we used integer coordinates, the adjustment value was 1. Although we now use fixed point coordinates instead, we still want the adjustment value to be the same as the resolution of the numeric representation. And that is the value 1 - _in fixed point representation_. So although the code does not seem to have changed, the meaning of the number 1 here has changed.
 
 And that is all that's needed in the rasterizer! Sweet! We now have a fully working and correct rasterizer that gives us smooth animation, due to subpixel resolution support.
 
