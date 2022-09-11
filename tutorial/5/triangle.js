@@ -42,7 +42,7 @@ export default class Triangle {
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
     // stride: change in raster buffer offsets from one line to next
-    const imageStride = 4 * (this.buffer.width - (xmax - xmin));
+    const imageStride = 4 * (this.buffer.width - (xmax - xmin) - 1);
 
     // w = edge distances
     const w = new Vector();

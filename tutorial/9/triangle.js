@@ -33,7 +33,7 @@ export default class Triangle {
       return;
     }
 
-    // create bounding box around triangle, expanding to nearest integer coordinates
+    // create bounding box around triangle, expanding to integer coordinates
     let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
     let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
     let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;

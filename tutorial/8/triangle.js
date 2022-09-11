@@ -33,7 +33,7 @@ export default class Triangle {
       return;
     }
 
-    // create bounding box around triangle, expanding to nearest integer coordinates
+    // create bounding box around triangle, expanding to integer coordinates
     let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
     let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
     let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
@@ -42,7 +42,7 @@ export default class Triangle {
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
     // stride: change in raster buffer offsets from one line to next
-    const imageStride = 4 * (this.buffer.width - (xmax - xmin));
+    const imageStride = 4 * (this.buffer.width - (xmax - xmin) - 1);
 
     // w = edge distances
     const w = new FixedPointVector();
