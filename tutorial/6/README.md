@@ -23,20 +23,20 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/9f51672b8e895df9a78
 
 Now comes the important part: We no longer use integer values when calculating the determinant values.
 
-The vertex coordinates used to be integers, and refer to a location in a grid of discrete values, but now they represent a point within a continuous two-dimensional space. The edges between vertices also belong in this continuous space.
+The vertex coordinates used to be integers, and refer to a location in a grid of discrete values, but now they represent a point within a continuous two-dimensional space. The edges between vertices also exist in this continuous space.
 
-How can ve convert the edges in this space over to integer coordinates for pixel drawing?
+How can ve convert the edges over to integer coordinates for pixel drawing?
 
-We can imagine putting a grid, with a spacing of 1 by 1, on top of the continuous vertex space. The grid lines intersect the integer values in this continuous space, and the grid cells represent pixels. This means that pixel edges lie at integer coordinates, and that pixel centers are located at (integer) + 0.5 coordinate values, for both axes.
+We can imagine putting a grid, with a spacing of 1 by 1, on top of the continuous vertex space. The grid lines intersect the integer values in this continuous space, and the grid cells represent pixels. This means that pixel edges lie at integer coordinates, and that pixel centers are located at (integer) + 0.5 coordinate values.
 
 When we now draw a triangle, we loop through all coordinates inside our integer bounding box, and calculate the determinant value at pixel centers, ie at integer coordinates where we have added 0.5 along both axes. So the triangles will need to cover those points for a pixel to be drawn.
 
 https://github.com/kristoffer-dyrkorn/software-renderer/blob/9f51672b8e895df9a78725130e03d5471ba87b40/tutorial/6/triangle.js#L53-L76
 
-The choice of adding (and not subtracting) 0.5 is made since then we don't have to deal with any negative coordinate values anywhere in our coordinate system. (If we subtracted 0.5, the left half of the leftmost pixels on screen would have a negative x coordinate). (See [this article](https://www.realtimerendering.com/blog/the-center-of-the-pixel-is-0-50-5/) for details.)
+The choice of adding (and not subtracting) 0.5 is made since then we don't have to deal with any negative coordinate values anywhere in our coordinate systems on screen. (If we subtracted 0.5, the left half of the leftmost pixels on screen would have a negative x coordinate). (See [this article](https://www.realtimerendering.com/blog/the-center-of-the-pixel-is-0-50-5/) for details.)
 
-To summarize: We keep the input vertex coordinates as they are (floating point values), and calculate a slightly larger bounding box, having integer coordinates, that covers the triangle. We then calculate the determinant at each (integer) + 0.5 location, and use this result to decide whether to draw that pixel or not. The net effect is that the placement of the vertices inside their pixel grid cell (ie, the fractional values of the vertex coordinates) are kept in consideration in all of the determinant calculations along the triangle edges. The rasterizer will then reproduce the triangle (ie, as defined in the continuous coordinate space) on screen (ie, in our integer-based pixel grid) in a much more precise way.
+To summarize: We keep the input vertex coordinates as they are (floating point values), and calculate a slightly larger bounding box, having integer coordinates, that covers the triangle. We then calculate the determinant at each (integer) + 0.5 location, and use the result to decide whether to draw that pixel or not. The net effect is that the location of the vertices inside their pixel grid cell (ie, the fractional values of the vertex coordinates) are kept in consideration in all of the determinant calculations along the triangle edges. The rasterizer will then reproduce the triangle (ie, as defined in the continuous coordinate space) on screen (ie, in our integer-based pixel grid) in a much more precise way.
 
 Here is the result - the two triangles now rotate smoothly. This looks good!
 
-But wait - there is something wrong here - there are singel-pixel gaps running up and down the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!
+But wait - there is something wrong here: There are singel-pixel gaps running up and down the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!
