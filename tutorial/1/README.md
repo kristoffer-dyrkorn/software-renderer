@@ -19,7 +19,7 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b1942
 
 The function receives three inputs `a`, `b` and `c`. The edge coordinates are `a` and `b`, and the candidate pixel coordinates is `c`. (A `Vector` here simply represents an array of values - where the value at index 0 is the x-coordinate, and at the value at index 1 is the y-coordinate.)
 
-The code calculates two vectors `ab` and `ac`. The vectors describe the differences in x- and y-coordinates when going from `a` to `b` and from `a` to `c`. It then cross-multiplies those vectors. This is the same as calculating what is called a determinant - if the vectors are organized in a 2 by 2 matrix. In this article series, we will call the result of this calculation a determinant value.
+The code calculates two vectors `ab` and `ac`. The vectors describe the differences in x- and y-coordinates when going from `a` to `b` and from `a` to `c`. It then cross-multiplies those vectors. This is the same as calculating what is called a determinant - if the vectors were organized in a 2 by 2 matrix. In this article series, we will call the result of this calculation a determinant value.
 
 We repeat this edge test for each of the three edges in the triangle - and this way we have an inside test for the whole triangle.
 
