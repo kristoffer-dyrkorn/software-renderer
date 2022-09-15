@@ -4,7 +4,7 @@ In this section, you will get to know the principles behind the rasterization me
 
 ## Introduction
 
-The method we use was first published by Juan Piñeda in 1988, in a paper called ["A Parallel Algorithm for Polygon Rasterization"](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf). As the name says, it was made for parallel execution, something we will not have here, but since the overall principle behind it is simple we will use it in this tutorial.
+The method we use was first published by Juan Piñeda in 1988, in a paper called ["A Parallel Algorithm for Polygon Rasterization"](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf). As the name says, it was made for parallel execution, something we will not have here, but since the overall principle it uses is simple we will use it in this tutorial.
 
 If you do some searching on the web, you will likely find many implementations of the algorithm. The oldest one I have found is by Nicolas Capens, posted on the site `devmaster.net` (a game developer forum) back in 2004. His code seems to be the original one that has inspired most of the other triangle rasterizer implementations out there. That site does not exist anymore, but The Internet Archive [has a copy of the posting](https://web.archive.org/web/20120220025947/http://devmaster.net/forums/topic/1145-advanced-rasterization/) if you are interested.
 
@@ -29,9 +29,9 @@ We repeat this edge test for each of the three edges in the triangle - and this 
 
 At this point, we have a working test - as long as the vertices are specified in a counterclockwise order. The next question is: Which pixels should we test?
 
-The first assumption could be to test all pixels on screen, but we can be more efficient than that - we could test just the pixels inside a bounding box around the triangle. This way we test fewer pixels, but we still ensure that we test all the pixel we need to test. If finding such a bounding box can be done relatively quickly (quicker than testing all pixels on the screen), then this will also make the code execute faster.
+The first assumption could be to test all pixels on screen, but we can be more efficient than that - we could test just the pixels inside a bounding box around the triangle. This way we test fewer pixels, but still all the ones that we have to test. If finding a bounding box can be done relatively quickly (quicker than testing all pixels on the screen), then this will be a faster solution.
 
-The bounding box can be found by taking the minimum and maximum values of all the vertex coordinates. And this is a very quick operation, so we will use that optimization.
+The bounding box can be found by taking the minimum and maximum values of all the vertex coordinates. And this is a very quick operation, so we will use that here.
 
 In code, finding the bounding box looks like this:
 
@@ -39,7 +39,7 @@ https://github.com/kristoffer-dyrkorn/software-renderer/blob/3d4164fd9e2185b1942
 
 ## Drawing the triangle
 
-Now we have all we need: We can loop through all points inside the triangle bounding box, we can calculate three determinant values (based on each of the triangle edges and the candidate pixel), and if all the determinant values are positive, we know that the candidate pixel is inside the triangle. In that case we paint the pixel with the desired triangle color. (For now we also assume that pixels that lie exactly on a triangle edge belong to the triangle.)
+Now we have all we need: We can loop through all points inside the triangle bounding box, we can calculate three determinant values (based on each of the triangle edges and the candidate pixel), and if all the determinant values are positive, we know that the candidate pixel is inside the triangle. In that case we paint the pixel with the desired triangle color. (For now we also assume that pixels that lie exactly on a triangle edge also belong to the triangle.)
 
 The code looks like this:
 
