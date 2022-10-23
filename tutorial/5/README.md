@@ -58,6 +58,6 @@ We use the `requestAnimationFrame` method to synchronise the drawing and rotatio
 
 We are now ready to inspect the results. Not bad - the triangles are indeed rotating, but notice: The movement is not smooth - the triangles seem to jump around a bit as they rotate.
 
-![](../images/5-integer-rotate.mov)
+![](../images/5-integer-rotate.gif)
 
 This can be improved, check out the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/6#readme)!

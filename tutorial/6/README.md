@@ -101,6 +101,6 @@ To summarize: We keep the input vertex coordinates as they are (floating point v
 
 Here is the result - the two triangles now rotate smoothly. This looks good!
 
-![](../images/6-floating-point-rotate-glitch.mov)
+![](../images/6-floating-point-rotate-glitch.gif)
 
 But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/7#readme)!
