@@ -14,7 +14,7 @@ This tutorial is structured as follows: First, you will get to know the principl
 
 Here is an overview of the tutorial - enjoy!
 
-1. [A walkthrough of the method](1#readme)
+1. [A walkthrough of the method](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
 2. Setting up the browser to draw pixels
 3. The first, basic rasterizer
 4. Moar triangles, moar problems
