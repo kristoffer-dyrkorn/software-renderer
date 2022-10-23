@@ -66,7 +66,7 @@ const ymax = Math.max(va[1], vb[1], vc[1]);
 
 Here, the `Vectors` `va`, `vb` `vc` contain the vertex coordinates of the triangle.
 
-![](../images/1-bounding box.png)
+![](../images/1-bounding-box.png)
 
 ## Drawing the triangle
 
