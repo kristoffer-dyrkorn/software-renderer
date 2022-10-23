@@ -15,11 +15,11 @@ This tutorial is structured as follows: First, you will get to know the principl
 Here is an overview of the tutorial - enjoy!
 
 1. [A walkthrough of the method](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
-2. Setting up the browser to draw pixels
-3. The first, basic rasterizer
-4. Moar triangles, moar problems
-5. We've got to move it
-6. Let's go continuous!
-7. One solution, but two new problems
-8. Let's fix this
-9. Time to go incremental
+2. [Setting up the browser to draw pixels](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
+3. [The first, basic rasterizer](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
+4. [Moar triangles, moar problems](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
+5. [We've got to move it](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
+6. [Let's go continuous!](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
+7. [One solution, but two new problems](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
+8. [Let's fix this](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
+9. [Time to go incremental](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)

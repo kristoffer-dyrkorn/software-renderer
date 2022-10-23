@@ -14,7 +14,7 @@ As an example, let's create a toy floating point format that follows the same st
 
 Let's set aside 3 decimal digits to store the numberic value. As in the floating point standard, the total number of digits is fixed, but the decimal can be placed anywhere between the digits. If we ignore negative numbers, the smallest possible value we can represent is 0. The next larger values are 0.01, 0.02, 0.03 and so on. That is, we have a resolution of 0.01. At a value of 9.99 the next larger value becomes 10.0, and after that the next numbers are 10.1, 10.2 and 10.3. So, the resolution has become 0.1. After 99.9 comes 100, and then we are at integer resolution - all the way up to the maximum value of 999.
 
-![](../images/7-floating point numbers.png)
+![](../images/7-floating-point-numbers.png)
 
 So - the smallest possible value we can use when nudging our determinant will depend on the value of the determinant itself! That sounds a bit complicated, but is an artifact of the floating point representation (the IEEE 754 standard). In numerics, this smallest difference - which we have called resolution here - is called ULP (Unit of Least Precision).
 
@@ -50,7 +50,7 @@ The number we choose to multiply by should be some number 2^n. Then we can conve
 
 This is how bit shifting can replace division:
 
-![](../images/7-bit shift fixed point.png)
+![](../images/7-bit-shift-fixed-point.png)
 
 When we bit-shift n places, we get the same result as division without rounding. This will also remove the fractional part of the number, so it is essentially a `trunc` or `floor` operation. If we need to support proper rounding we should add the value 0.5 (converted to fixed point representation) before bit-shifting.
 
@@ -66,7 +66,7 @@ It is here useful to introduce the concept of subpixels. Let's assume that each 
 
 This is how a pixel containing 64 subpixels looks like:
 
-![](../images/7-pixels and subpixels.png)
+![](../images/7-pixels-and-subpixels.png)
 
 Another way to look at this is to imagine that we create a higher-resolution "invisible grid" of the screen, and perform exact integer calculations on that grid, all while keeping our drawing operations running on the normal pixel grid. In addition, all floating point coordinates undergo the exact same quantization step when they are converted to fixed point numbers. That means they will be snapped to their nearest subpixel location. This is the same type of pixel shifting we saw early on, when we rounded floating point numbers to integers, but now the magnitude of the shifts is much smaller, and it does not visibly affect the smoothness of the animation.
 
@@ -76,4 +76,4 @@ How smooth does the animation need to be? How many bits should we set aside for 
 
 Choosing 4 bits means we multiply all incoming floating point numbers by 2^4 = 16 before rounding the result off to an integer, and then store that result in an integer variable. To get from a fixed point representation back to a normal number we shift the fixed point number right by 4 places. As mentioned, this conversion essentially is a truncation (a `floor` operation), so to do proper rounding we will need to add 0.5 (in fixed point representation, meaning, an integer value of 8) to the number before shifting to the right.
 
-In the application code, all of the fixed point operations we need for the rasterizer are implemented in the class `FixedPointVector`. We will not go through that code here. However, in the next section we will look at how we can convert the rasterizer to use this new and exciting number representation.
+In the application code, all of the fixed point operations we need for the rasterizer are implemented in the class `FixedPointVector`. We will not go through that code here. However, in the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/8#readme) we will look at how we can convert the rasterizer to use this new and exciting number representation.

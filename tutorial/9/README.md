@@ -19,7 +19,7 @@ It turns out we can apply this trick here. We can do the full determinant and fi
 
 In this situation, we are lucky, since if you do the math (which we won't here) the change in determinant value per pixel - both horizontally and vertically - is constant. The math might be understood intuitively if you recall that the determinant value is proportional to the shortest distance from a candidate pixel to a triangle edge. That means the change only depends of the slope of the triangle edge - and as long as both the triangle edges and the scan directions are straight lines the change is constant.
 
-![](../images/9-constant change.png)
+![](../images/9-constant-change.png)
 
 The change also easily calculated. That means that we can update the current (running) determinant value very quickly.
 

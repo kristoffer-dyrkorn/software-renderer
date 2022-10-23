@@ -60,10 +60,11 @@ The next step is to find the minimum and maximum coordinates for the vertices. T
 Then we define two `Vector`s, one to hold a variable `w` (that will be explained shortly) and one to hold the variable `p` which contains the x- and y-coordinates of the current candidate pixel.
 
 ```JavaScript
-    let xmin = Math.min(va[0], vb[0], vc[0]) - 1;
-    let xmax = Math.max(va[0], vb[0], vc[0]) + 1;
-    let ymin = Math.min(va[1], vb[1], vc[1]) - 1;
-    let ymax = Math.max(va[1], vb[1], vc[1]) + 1;
+    const xmin = Math.min(va[0], vb[0], vc[0]) - 1;
+    const ymin = Math.min(va[1], vb[1], vc[1]) - 1;
+
+    const xmax = Math.max(va[0], vb[0], vc[0]) + 1;
+    const ymax = Math.max(va[1], vb[1], vc[1]) + 1;
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 
@@ -108,6 +109,6 @@ We store the determinant values in a vector `w`. If all three `w` components are
 
 Now - the result looks like this:
 
-![](../images/3-first triangle.png)
+![](../images/3-first-triangle.png)
 
-And with that, we have our first, basic, rasterizer up and running!
+And with that, we have our first, basic, rasterizer up and running! Go to the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/4#readme) to see how we are going refine it.

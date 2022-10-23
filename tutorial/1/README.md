@@ -24,7 +24,7 @@ As long as all triangles to be drawn follow that convention, we can define a rul
 
 Finding out if a pixel lies to the left of an edge is not so hard. We can use a function that takes three coordinates as parameters - an edge start point, an edge end point, and a candidate pixel - and that returns a positive, zero or negative value. The result is positive if the candidate pixel is to the left of the edge, it will be zero if the pixel is exactly on the edge, and negative if the pixel is to the right.
 
-![](../images/1-edge function.png)
+![](../images/1-edge-function.png)
 
 In code, such a function can look like this:
 
@@ -93,4 +93,4 @@ for (let y = ymin; y < ymax; y++) {
 }
 ```
 
-The code here draws pixels - something we have not explained yet. Don't worry, we will get to that in the next section - where we go through how to set up the browser to run code and draw pixels one by one.
+The code here draws pixels - something we have not explained yet. Don't worry, we will get to that in the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/2#readme) - where we go through how to set up the browser to run code and draw pixels one by one.

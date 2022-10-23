@@ -27,7 +27,7 @@ We add another vertex to the array of all vertices, and create a new, separate v
 
 This is how it looks like:
 
-![](../images/4-twotriangles.png)
+![](../images/4-two-triangles.png)
 
 ## Oooops
 
@@ -43,7 +43,7 @@ You might remember from earlier that we considered all pixels lying exactly on a
 
 We need to sort out that - and introduce another rule for triangles. The rule that most graphics APIs use, is to say that pixels that lie exactly on a left side edge of a triangle, or on a flat top edge of a triangle, do not belong to that triangle. This is sufficient to cover all cases of shared edges - and make all pixels belong to just one triangle.
 
-![](../images/4-top left edge.png)
+![](../images/4-top-left-edge.png)
 
 The rule is often called the "top left" fill rule, and can be implemented like this, in the triangle rasterizer:
 
@@ -86,4 +86,4 @@ if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
 
 The rest of the code remains the same.
 
-And with that, we can safely draw lots of triangles - without gaps or overlaps!
+And with that, we can safely draw lots of triangles - without gaps or overlaps! But, we are not done yet. Go to [the next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/5#readme) to see what happens when we start animating the triangles.
