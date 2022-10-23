@@ -108,6 +108,6 @@ We store the determinant values in a vector `w`. If all three `w` components are
 
 Now - the result looks like this:
 
-![](images/3 - first triangle.png)
+![](images/3-first triangle.png)
 
 And with that, we have our first, basic, rasterizer up and running!

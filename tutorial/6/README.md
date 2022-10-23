@@ -10,7 +10,7 @@ We will still need to put pixels on the screen using integer coordinates, since 
 
 The effect can be illustrated by looking at line drawing - and what happens if one of the line end points (here marked with red dots) stays fixed while the other is slowly moving downwards inside a single pixel.
 
-![](images/6 - rounding effect.png)
+![](images/6-rounding effect.png)
 
 When using discrete coordinates, the rounding will move the end point to the the pixel centre - so the line will look the same in all three cases. But, when using continuous coordinates, the position of the moving endpoint will have an influence on how the line is drawn.
 
@@ -58,15 +58,15 @@ How can ve convert the edges over to integer coordinates for pixel drawing?
 
 We can imagine putting a grid, with a spacing of 1 by 1, on top of the continuous vertex space. The grid lines intersect the integer values of this continuous space, and the grid cells represent pixels.
 
-![](images/6 - continuous discrete.png)
+![](images/6-continuous discrete.png)
 
 This means that pixel edges lie at integer coordinates, and that pixel centers are located at (integer) + 0.5 coordinate values.
 
-![](images/6 - pixel centers.png)
+![](images/6-pixel centers.png)
 
 When we now draw a triangle, we loop through all coordinates inside our integer bounding box, and calculate the determinant value at pixel centers, ie at integer coordinates where we have added 0.5 along both axes. So the triangles will need to cover those points for a pixel to be drawn. (The illustration only shows candidate points near the right triangle edge.)
 
-![](images/6 - determinant pixel center.png)
+![](images/6-determinant pixel center.png)
 
 ```JavaScript
 for (let y = ymin; y < ymax; y++) {
@@ -100,6 +100,6 @@ To summarize: We keep the input vertex coordinates as they are (floating point v
 
 Here is the result - the two triangles now rotate smoothly. This looks good!
 
-![](images/6 - floating point rotate glitch.gif)
+![](images/6-floating point rotate glitch.mov)
 
 But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!

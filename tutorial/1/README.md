@@ -12,19 +12,19 @@ If you search for triangle rasterization on the web, you will likely find many i
 
 Piñeda's method is based on scanning an region of candidate pixels, and for each candidate inside that region, finding out whether or not that pixel lies inside the triangle. If it is inside, the pixel is painted with the requested triangle color.
 
-![](images/1 - candidates.png)
+![](images/1-candidates.png)
 
 To do this efficiently, we have to set up our triangles in a specific way: We orient the vertices in a consistent order - which here is chosen to be counterclockwise. So, when going from any vertex and to the next, and then to the last one in the triangle, we will make a counterclockwise turn.
 
-![](images/1 - orientation.png)
+![](images/1-orientation.png)
 
 As long as all triangles to be drawn follow that convention, we can define a rule that will decide if a pixel is inside a triangle or not: "If a candidate pixel lies to the left of all three edges when we visit the vertices in order, then the pixel is inside the triangle."
 
-![](images/1 - left.png)
+![](images/1-left.png)
 
 Finding out if a pixel lies to the left of an edge is not so hard. We can use a function that takes three coordinates as parameters - an edge start point, an edge end point, and a candidate pixel - and that returns a positive, zero or negative value. The result is positive if the candidate pixel is to the left of the edge, it will be zero if the pixel is exactly on the edge, and negative if the pixel is to the right.
 
-![](images/1 - edge function.png)
+![](images/1-edge function.png)
 
 In code, such a function can look like this:
 
@@ -66,7 +66,7 @@ const ymax = Math.max(va[1], vb[1], vc[1]);
 
 Here, the `Vectors` `va`, `vb` `vc` contain the vertex coordinates of the triangle.
 
-![](images/1 - bounding box.png)
+![](images/1-bounding box.png)
 
 ## Drawing the triangle
 
