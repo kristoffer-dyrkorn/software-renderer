@@ -34,10 +34,11 @@ export default class Triangle {
     }
 
     // create bounding box around triangle, expanding to integer coordinates
-    let xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
-    let xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
-    let ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
-    let ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.ONE) >> FixedPointVector.SHIFT;
+    const xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
+    const ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+
+    const xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.DIVISION_CEILING) >> FixedPointVector.SHIFT;
+    const ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.DIVISION_CEILING) >> FixedPointVector.SHIFT;
 
     let imageOffset = 4 * (ymin * this.buffer.width + xmin);
 

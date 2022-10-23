@@ -1,7 +1,5 @@
 import Vector from "./vector.js";
 
-const DEGREES_TO_RADIANS = Math.PI / 180;
-
 export default class FixedPointVector extends Int32Array {
   constructor(x, y, z) {
     // homogeneous coordinates: x, y, z, w
@@ -58,5 +56,4 @@ export default class FixedPointVector extends Int32Array {
 
 FixedPointVector.SHIFT = 4;
 FixedPointVector.MULTIPLIER = 2 ** FixedPointVector.SHIFT;
-FixedPointVector.ONE = FixedPointVector.MULTIPLIER;
-FixedPointVector.ONE_HALF = FixedPointVector.ONE / 2;
+FixedPointVector.DIVISION_CEILING = FixedPointVector.MULTIPLIER * FixedPointVector.MULTIPLIER;

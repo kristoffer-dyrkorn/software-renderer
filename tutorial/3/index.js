@@ -11,6 +11,7 @@ window.addEventListener("resize", resize);
 resize();
 
 const vertices = [];
+
 vertices.push(new Vector(140, 100, 0));
 vertices.push(new Vector(140, 40, 0));
 vertices.push(new Vector(80, 40, 0));
