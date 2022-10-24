@@ -45,25 +45,25 @@ If you search for triangle rasterization on the web, you will likely find many i
 Piñeda's method is based on scanning an region of candidate pixels, and for each candidate inside that region, finding out whether or not that pixel lies inside the triangle. If it is inside, the pixel is painted with the requested triangle color.
 
 <p align="center">
-<img src="../images/1-candidates.png" width="75%">
+<img src="images/1-candidates.png" width="75%">
 </p>
 
 To do this efficiently, we have to set up our triangles in a specific way: We orient the vertices in a consistent order - which here is chosen to be counterclockwise. So, when going from any vertex and to the next, and then to the last one in the triangle, we will make a counterclockwise turn.
 
 <p align="center">
-<img src="../images/1-orientation.png" width="75%">
+<img src="images/1-orientation.png" width="75%">
 </p>
 
 As long as all triangles to be drawn follow that convention, we can define a rule that will decide if a pixel is inside a triangle or not: "If a candidate pixel lies to the left of all three edges when we visit the vertices in order, then the pixel is inside the triangle."
 
 <p align="center">
-<img src="../images/1-left.png" width="75%">
+<img src="images/1-left.png" width="75%">
 </p>
 
 Finding out if a pixel lies to the left of an edge is not so hard. We can use a function that takes three coordinates as parameters - an edge start point, an edge end point, and a candidate pixel - and that returns a positive, zero or negative value. The result is positive if the candidate pixel is to the left of the edge, it will be zero if the pixel is exactly on the edge, and negative if the pixel is to the right.
 
 <p align="center">
-<img src="../images/1-edge-function.png" width="75%">
+<img src="images/1-edge-function.png" width="75%">
 </p>
 
 In code, such a function can look like this:
@@ -107,7 +107,7 @@ const ymax = Math.max(va[1], vb[1], vc[1]);
 Here, the `Vectors` `va`, `vb` `vc` contain the vertex coordinates of the triangle.
 
 <p align="center">
-<img src="../images/1-bounding-box.png" width="75%">
+<img src="images/1-bounding-box.png" width="75%">
 </p>
 
 ## Drawing the triangle
@@ -181,7 +181,7 @@ However, there is still something left. Browsers will in general try to improve 
 The canvas element object - that we can access from JavaScript - also has an array that stores the color values for all the pixels it contains. The array contains 4 Uint8 (byte) values per pixel - one value for each of the red, blue, green and transparency (alpha) channels. After those 4 values come the 4 values for the next pixel. The array is one-dimensional, you cannot send it x and y values directly.
 
 <p align="center">
-<img src="../images/2-array-values.png" width="75%">
+<img src="images/2-array-values.png" width="75%">
 </p>
 
 To draw a pixel at a specific (x, y) location on screen, we need to convert the x and y values to an array index that then will point to the right location in the array. The correct value is `4 * (y * width + x)`. The multiplication by 4 is needed since we address bytes, and there are 4 byte values per pixel. At this array location we can then start writing byte values - red, green, blue and transparency values. The minimum value we can write is 0 (no intensity) and the maximum is 255 (full intensity). The resulting color of the pixel will be a mix of the three color intensities and the transparency. In this tutorial we will not use transparency, so we write a value of 255 - which means a completely opaque pixel.
@@ -189,7 +189,7 @@ To draw a pixel at a specific (x, y) location on screen, we need to convert the 
 Note: In the canvas coordinate system, (0, 0) is the top left pixel. The x-axis goes to the right, and the y-axis goes downwards. This is how the array addressing looks like if each pixel consisted of one byte:
 
 <p align="center">
-<img src="../images/2-array-indices.png" width="75%">
+<img src="images/2-array-indices.png" width="75%">
 </p>
 
 (As mentioned the array index must be multiplied by 4 since there are 4 bytes in each pixel in our setup.)
