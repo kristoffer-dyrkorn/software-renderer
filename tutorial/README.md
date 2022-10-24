@@ -26,7 +26,9 @@ This tutorial is structured as follows: First, you will get to know the principl
 8. [Let's fix this](#8-lets-fix-this)
 9. [Time to go incremental](#9-time-to-go-incremental)
 
-Enjoy!
+If you want to test out, modify and run the example code locally, clone this repository, start a local web server in the root directory (for example, using `python3 -m http.server`) and open the web page (at `http://localhost:8000` or similar). Each subfolder in the directory list has a running application you can look at.
+
+I you would prefer to just look at the example apps, follow the links at the end of each section.
 
 # 1. A walkthrough of the method
 
@@ -337,7 +339,7 @@ Now - the result looks like this:
 
 And with that, we have our first, basic, rasterizer up and running! We will now start refining it.
 
-In the mean time, you might want to look at [the code for this section](3) and some [utility classes](lib).
+In the mean time, you might want to look at [the code for this section](3) and some [utility classes](lib). There is also [a running example app](https://kristoffer-dyrkorn.github.io/triangle-rasterizer/3/).
 
 # 4. Moar triangles, moar problems
 
@@ -437,7 +439,7 @@ The rest of the code remains the same.
 
 And with that, we can safely draw lots of triangles - without gaps or overlaps! But, we are not done yet. We will now start animating the triangles.
 
-In the mean time, you might want to look at [the code for this section](4) and some [utility classes](lib).
+In the mean time, you might want to look at [the code for this section](4) and some [utility classes](lib). There is also [a running example app](https://kristoffer-dyrkorn.github.io/triangle-rasterizer/4/).
 
 # 5. We've got to move it
 
@@ -507,7 +509,7 @@ We are now ready to inspect the results. Not bad - the triangles are indeed rota
 
 This can be improved! We will have a look at that in the next section.
 
-In the mean time, you might want to look at [the code for this section](5) and some [utility classes](lib).
+In the mean time, you might want to look at [the code for this section](5) and some [utility classes](lib). There is also [a running example app](https://kristoffer-dyrkorn.github.io/triangle-rasterizer/5/).
 
 # 6. Let's go continuous!
 
@@ -630,7 +632,7 @@ Here is the result - the two triangles now rotate smoothly. This looks good!
 
 But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? We will figure out that next.
 
-In the mean time, you might want to look at [the code for this section](6) and some [utility classes](lib).
+In the mean time, you might want to look at [the code for this section](6) and some [utility classes](lib). There is also [a running example app](https://kristoffer-dyrkorn.github.io/triangle-rasterizer/6/).
 
 # 7. One solution, but two new problems
 
@@ -722,7 +724,7 @@ Choosing 4 bits means we multiply all incoming floating point numbers by 2^4 = 1
 
 In the application code, all of the fixed point operations we need for the rasterizer are implemented in the class `FixedPointVector`. We will not go through that code here. However, in the next section we will look at how we can convert the rasterizer to use this new and exciting number representation.
 
-There is no code for this section but I promise: There will be code for the next one.
+There is no code for this section, but I promise: There will be code for the next one.
 
 # 8. Let's fix this
 
@@ -813,7 +815,7 @@ if (isLeftOrTopEdge(va, vb)) w[2]--;
 
 And that is all that's needed in the rasterizer! Sweet! We now have a fully working and correct rasterizer that gives us smooth animation, due to subpixel resolution support.
 
-If you want to test out various subpixel resolutions and see the effects yourself, you can adjust the value of the `FixedPointVector.SHIFT` constant (see). Try out values like 0 (no subpixels - ie back to a pure-integer version), 1, 2, 4, and 8 for example.
+If you want to test out various subpixel resolutions and see the effects yourself, you can adjust the value of the `FixedPointVector.SHIFT` constant (at the end of [this file](https://github.com/kristoffer-dyrkorn/software-renderer/blob/main/tutorial/lib/fixedpointvector.js)). Try out values like 0 (no subpixels - ie back to a pure-integer version), 1, 2, 4, and 8 for example.
 
 ```JavaScript
 FixedPointVector.SHIFT = 4;
@@ -835,7 +837,7 @@ When running the code on my machine, drawing the green triangle takes around 2.3
 
 The profiler in my browser tells me that we spend a lot of time calculating determinants, evaluating the fill rule and instantiating `FixedPointVectors`. Could we speed up our code? Yes we can! In the next section we will do just that.
 
-The [code for this section](8) and some [utility classes](lib) is also available.
+The [code for this section](8) and some [utility classes](lib) is also available. There is also [a running example app](https://kristoffer-dyrkorn.github.io/triangle-rasterizer/8/).
 
 # 9. Time to go incremental
 
@@ -935,6 +937,6 @@ We now call it a day. Drawing a single triangle takes 0.23 ms on my machine. Tha
 
 The result is a fast, smooth and correct triangle rasterizer. Not bad!
 
-Here you can look at the final version [of the code](9) and the [utility classes](lib).
+Here you can look at the final version [of the code](9) and the [utility classes](lib). There is also [the final example app](https://kristoffer-dyrkorn.github.io/triangle-rasterizer/9/).
 
 # 10. Epilogue
