@@ -1,6 +1,6 @@
 # A walkthrough of the method
 
-(This article is part of a [series](../tutorial#sections). Also see the [previous section].)
+(This article is part of a [series](../#sections). Also see the [previous section].)
 
 In this section, you will get to know the principles behind the rasterization method we will use.
 
