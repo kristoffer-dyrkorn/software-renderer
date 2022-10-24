@@ -216,11 +216,11 @@ ctx.putImageData(screenBuffer, 0, 0);
 
 And with that, we have all we need to start drawing triangles in the browser! Let's do that in the next section.
 
-In the mean time, here is the [code for this section](2).
+The [code for this section](2) and some [utility classes](lib) is also available.
 
 # 3. The first, basic rasterizer
 
-(This article is part of a [series](#sections). You can jump to the [previous section](#2-setting-up-the-browser-to-draw-pixels) or the [next section](#4) if you would like to.)
+(This article is part of a [series](#sections). You can jump to the [previous section](#2-setting-up-the-browser-to-draw-pixels) or the [next section](#4-moar-triangles-moar-problems) if you would like to.)
 
 In this section, we will _finally_ get to draw a triangle on the screen - using the method we have described in section 1 and the setup code from section 2.
 
@@ -332,16 +332,16 @@ We store the determinant values in a vector `w`. If all three `w` components are
 Now - the result looks like this:
 
 <p align="center">
-<img src="../images/3-first-triangle.png" width="75%">
+<img src="images/3-first-triangle.png" width="75%">
 </p>
 
 And with that, we have our first, basic, rasterizer up and running! Go to the next section to see how we are going refine it.
 
-In the mean time, here is the [code for this section](3).
+The [code for this section](3) and some [utility classes](lib) is also available.
 
 # 4. Moar triangles, moar problems
 
-(This article is part of a [series](#sections). You can jump to the [previous section](#3-the-first-basic-rasterizer) or the [next section](#5) if you would like to.)
+(This article is part of a [series](#sections). You can jump to the [previous section](#3-the-first-basic-rasterizer) or the [next section](#5-weve-got-to-move-it) if you would like to.)
 
 In this section, we will take a closer look at what happens when we draw two triangles that share an edge. There are some important details that need to be resolved.
 
@@ -371,7 +371,7 @@ We add another vertex to the array of all vertices, and create a new, separate v
 This is how it looks like:
 
 <p align="center">
-<img src="../images/4-two-triangles.png" width="75%">
+<img src="images/4-two-triangles.png" width="75%">
 </p>
 
 ## Oooops
@@ -379,7 +379,7 @@ This is how it looks like:
 At first, this seems to look just great. But, if we draw first the green triangle, and then the blue one, we will see that there are some blue pixels that are drawn on top of the green ones.
 
 <p align="center">
-<img src="../images/4-overdraw.png" width="75%">
+<img src="images/4-overdraw.png" width="75%">
 </p>
 
 This is called overdraw - and it is something we want to avoid. First of all, it will worsen performance, since we spend time drawing pixels that later become hidden by other pixels. Also, the visual quality will suffer: It will make edges between triangles seem to move, depending on which triangle was drawn first. Should we want to use the rasterizer to draw detailed 3D objects with many triangles, we will in general have no control over the sequence the triangles will be drawn in. The result will look awful - the edges will flicker.
@@ -391,7 +391,7 @@ You might remember from earlier that we considered all pixels lying exactly on a
 We need to sort out that - and introduce another rule for triangles. The rule that most graphics APIs use, is to say that pixels that lie exactly on a left side edge of a triangle, or on a flat top edge of a triangle, do not belong to that triangle. This is sufficient to cover all cases of shared edges - and make all pixels belong to just one triangle.
 
 <p align="center">
-<img src="../images/4-top-left-edge.png" width="75%">
+<img src="images/4-top-left-edge.png" width="75%">
 </p>
 
 The rule is often called the "top left" fill rule, and can be implemented like this, in the triangle rasterizer:
@@ -437,11 +437,11 @@ The rest of the code remains the same.
 
 And with that, we can safely draw lots of triangles - without gaps or overlaps! But, we are not done yet. Go to the next section to see what happens when we start animating the triangles.
 
-In the mean time, here is the [code for this section](4).
+The [code for this section](4) and some [utility classes](lib) is also available.
 
 # 5. We've got to move it
 
-(This article is part of a [series](#sections). You can jump to the [previous section](#4) or the [next section](#6) if you would like to.)
+(This article is part of a [series](#sections). You can jump to the [previous section](#4-moar-triangles-moar-problems) or the [next section](#6) if you would like to.)
 
 In this section, we will start animating our triangles - we will make them rotate on the screen!
 
@@ -502,9 +502,435 @@ We use the `requestAnimationFrame` method to synchronise the drawing and rotatio
 We are now ready to inspect the results. Not bad - the triangles are indeed rotating, but notice: The movement is not smooth - the triangles seem to jump around a bit as they rotate.
 
 <p align="center">
-<img src="../images/5-integer-rotate.png" width="75%">
+<img src="images/5-integer-rotate.png" width="75%">
 </p>
 
-This can be improved, check out the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/6#readme)!
+This can be improved, check out the next section!
 
-In the mean time, here is the [code for this section](5).
+The [code for this section](5) and some [utility classes](lib) is also available.
+
+# 6. Let's go continuous!
+
+(This article is part of a [series](#sections). You can jump to the [previous section](#5-weve-got-to-move-it) or the [next section](#7) if you would like to.)
+
+In this section, we will improve the smoothness of the animation.
+
+So far, we have only used integer values when drawing things on screen. But, as we rotate our triangles, the new vertex coordinates will get non-integer values. We have - until now - rounded coordinates off to integers before sending them to the rasterizer. This means that all calculations in the rasterizer will be performed on coordinate values that are slightly shifted around a bit. The shifts are small (less than one pixel) but will have random magnitude and direction, and the result is that the triangles will jump around a bit as they rotate.
+
+One way to improve on the situation is to base the calculations in the rasterizer directly on floating point values coming from the rotated vertices.
+
+We will still need to put pixels on the screen using integer coordinates, since that is the only way to address the screen buffer, but from now on we will do so without first rounding the vertex coordinates.
+
+The effect can be illustrated by looking at line drawing - and what happens if one of the line end points (here marked with red dots) stays fixed while the other is slowly moving downwards inside a single pixel.
+
+<p align="center">
+<img src="images/6-rounding-effect.png" width="75%">
+</p>
+
+When using discrete coordinates, the rounding will move the end point to the the pixel centre - so the line will look the same in all three cases. But, when using continuous coordinates, the position of the moving endpoint will have an influence on how the line is drawn.
+
+So, we will now evalute triangle candidate pixels in a different way than before. Let's have a closer look.
+
+## The application code
+
+In the application, the only change we will make is that we don't round off the rotated vertex coordinates. The `rotate(angle)` function now looks like this:
+
+```JavaScript
+function rotate(angle) {
+    const DEG_TO_RAD = Math.PI / 180;
+
+    for (let i = 0; i < 4; i++) {
+        const v = new Vector(vertices[i]);
+        v.sub(center);
+
+        const r = rotatedVertices[i];
+        r[0] = v[0] * Math.cos(angle * DEG_TO_RAD) - v[1] * Math.sin(angle * DEG_TO_RAD);
+        r[1] = v[0] * Math.sin(angle * DEG_TO_RAD) + v[1] * Math.cos(angle * DEG_TO_RAD);
+
+        r.add(center);
+    }
+}
+```
+
+## The triangle code
+
+In the rasterizer, we now receive floating point coordinates. However, we would still like our bounding box to be defined by integer coordinates. We still loop over pixel coordinates (integer values) when we check whether pixels should be drawn or not. So we want an easy way to calculate and keep track of the final screen coordinates for the pixels we are going to draw.
+
+We use rounding up or down (depending on whether we look at min or max values) to modify the bounding box so it at least covers the triangle, and expands out to the nearest integer coordinates.
+
+```JavaScript
+const xmin = Math.floor(Math.min(va[0], vb[0], vc[0]));
+const ymin = Math.floor(Math.min(va[1], vb[1], vc[1]));
+
+const xmax = Math.ceil(Math.max(va[0], vb[0], vc[0]));
+const ymax = Math.ceil(Math.max(va[1], vb[1], vc[1]));
+```
+
+Now comes the important part: We no longer use integer values when calculating the determinant values.
+
+The vertex coordinates used to be integers, and refer to a location in a grid of discrete values, but now they represent a point within a continuous two-dimensional space. The edges between vertices also exist in this continuous space.
+
+How can ve convert the edges over to integer coordinates for pixel drawing?
+
+We can imagine putting a grid, with a spacing of 1 by 1, on top of the continuous vertex space. The grid lines intersect the integer values of this continuous space, and the grid cells represent pixels.
+
+<p align="center">
+<img src="images/6-continuous-discrete.png" width="75%">
+</p>
+
+This means that pixel edges lie at integer coordinates, and that pixel centers are located at (integer) + 0.5 coordinate values.
+
+<p align="center">
+<img src="images/6-pixel-centers.png" width="75%">
+</p>
+
+When we now draw a triangle, we loop through all coordinates inside our integer bounding box, and calculate the determinant value at pixel centers, ie at integer coordinates where we have added 0.5 along both axes. So the triangles will need to cover those points for a pixel to be drawn. (The illustration only shows candidate points near the right triangle edge.)
+
+<p align="center">
+<img src="images/6-determinant-pixel-center.png" width="75%">
+</p>
+
+```JavaScript
+for (let y = ymin; y < ymax; y++) {
+    for (let x = xmin; x < xmax; x++) {
+        p[0] = x + 0.5;
+        p[1] = y + 0.5;
+
+        w[0] = this.getDeterminant(vb, vc, p);
+        w[1] = this.getDeterminant(vc, va, p);
+        w[2] = this.getDeterminant(va, vb, p);
+
+        if (isLeftOrTopEdge(vb, vc)) w[0]--;
+        if (isLeftOrTopEdge(vc, va)) w[1]--;
+        if (isLeftOrTopEdge(va, vb)) w[2]--;
+
+        if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
+            this.buffer.data[imageOffset + 0] = color[0];
+            this.buffer.data[imageOffset + 1] = color[1];
+            this.buffer.data[imageOffset + 2] = color[2];
+            this.buffer.data[imageOffset + 3] = 255;
+        }
+        imageOffset += 4;
+    }
+    imageOffset += imageStride;
+}
+```
+
+The choice of adding (and not subtracting) 0.5 is made since then we don't have to deal with any negative coordinate values anywhere in our coordinate systems on screen. (If we subtracted 0.5, the left half of the leftmost pixels on screen would have a negative x coordinate). (See [this article](https://www.realtimerendering.com/blog/the-center-of-the-pixel-is-0-50-5/) for details.)
+
+To summarize: We keep the input vertex coordinates as they are (floating point values), and calculate a slightly larger bounding box, having integer coordinates, that encloses the triangle. We then calculate the determinant at each (integer) + 0.5 location, and use the result to decide whether to draw that pixel or not. The net effect is that the location of the vertices inside their pixel grid cell (ie, the fractional values of the vertex coordinates) are kept in consideration in all of the determinant calculations along the triangle edges. The result is that the rasterizer will now reproduce the definition of the triangle (belonging in a continuous coordinate space) on screen (on a discrete pixel grid) in a much more precise way as. Just as the line drawing example in the very beginning of this section illustrated.
+
+Here is the result - the two triangles now rotate smoothly. This looks good!
+
+<p align="center">
+<img src="images/6-floating-point-rotate-glitch.png" width="75%">
+</p>
+
+But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!
+
+The [code for this section](6) and some [utility classes](lib) is also available.
+
+# 7. One solution, but two new problems
+
+(This article is part of a [series](#sections). You can jump to the [previous section](#6) or the [next section](#8) if you would like to.)
+
+## Floating-point numbers
+
+The rasterizer runs on floating point numbers, and uses the rotated vertex coordinates as input for the determinant calculations.
+
+The artifacts we see are gaps between triangles. Does this problem somehow involve the fill rule? Well, yes. Until now we have used an adjustment value of 1, and that has consistently nudged the determinant values so that pixels are not overdrawn, and the triangles have no gaps. The value 1 is the least possible value that will separate pixels exactly on an edge shared between two neighbor triangles - as long as we use integer coordinates.
+
+But now we get gaps. The reason is that we now have higher resolution in all our calculations. We are using floating point values when we place vertices, and those values are used directly as input for the determinant calculations. The smallest possible difference between two floating point values is much smaller than 1 – so now we create an unnecessary large separation between neighboring edges.
+
+Actually, the smallest possible difference is not even a constant number. In a floating point representation, the resolution (the shortest distance between two values that can be represented exactly) depends on the value itself. Let's look at this in detail.
+
+As an example, let's create a toy floating point format that follows the same structure as the floating point representation used in our code. This example format might not be particularly useful in practice, but for now let's ignore that.
+
+Let's set aside 3 decimal digits to store the numberic value. As in the floating point standard, the total number of digits is fixed, but the decimal can be placed anywhere between the digits. If we ignore negative numbers, the smallest possible value we can represent is 0. The next larger values are 0.01, 0.02, 0.03 and so on. That is, we have a resolution of 0.01. At a value of 9.99 the next larger value becomes 10.0, and after that the next numbers are 10.1, 10.2 and 10.3. So, the resolution has become 0.1. After 99.9 comes 100, and then we are at integer resolution - all the way up to the maximum value of 999.
+
+<p align="center">
+<img src="images/7-floating-point-numbers.png" width="75%">
+</p>
+
+So - the smallest possible value we can use when nudging our determinant will depend on the value of the determinant itself! That sounds a bit complicated, but is an artifact of the floating point representation (the IEEE 754 standard). In numerics, this smallest difference - which we have called resolution here - is called ULP (Unit of Least Precision).
+
+Also, as long as we use floating point numbers only some numbers along the number line can be represented exactly. The rest will be nudged to the nearest available value. Here is an example of representable numbers in a low-precision floating point format. An ULP is the gap between two short tick marks.
+
+<p align="center">
+<img src="images/7-ulps.png" width="75%">
+</p>
+
+Since the size of an ULP varies, we will have varying degrees of exactness in number representations when using floating point. As an example, see for yourself what the answer to 0.1 + 0.2 is in JavaScript (which is the language we have used here). Although JavaScript uses double precision (64 bits) when handling numbers, that is still not sufficient. Also, the answer has nothing to do with JavaScript itself - this is due to floating point numbers, and to expected by any language that follows IEEE 754 correctly.
+
+We also hit upon another difficulty: The calculation of the determinant value itself will not necessarily be correct. The resolution we will get will be higher than when using integer values, but the mathematical operations we use to calculate determinants (subtraction and multiplication) are lossy in the floating point domain: Subtractions can incur information loss (due to [catastrophic cancellation](https://en.wikipedia.org/wiki/Catastrophic_cancellation)), and multiplications will scale up errors. This means that the calculated determinant value likely will deviate from what you would get when using pen and paper. It even turns out that determinant calculations are especially tricky to handle (see for example [this article](https://observablehq.com/@mourner/non-robust-arithmetic-as-art)).
+
+So, here we have two problems: The determinant values themselves will be imprecise, and at the same time we don't know what a suitable adjustment value will be. We need to ensure separation for the tie-breaker rule to work correctly, but here the base results as well as the adjustments are uncertain.
+
+Fortunately, we don't have to solve the problems. Instead, we can use a different representation of our vertex coordinates and determinant values. We can use what is called fixed point numbers. And then, seemingly by magic, both problems disappear!
+
+What is a fixed point number? Let's have a look.
+
+Like in a floating point representation, we will set a side a given number of digits. But instead of letting the comma be placed anywhere between digits, we will fix it: We place it at the same location for all numbers, hence the name fixed point.
+
+As an example, assume we set a side 4 digits in total, and use 2 digits for the integer part and 2 digits for the fractional part of a number. If we ignore negative numbers we can now represent a numerical range from 0 to 99.99, and the resolution is constant across the entire value range: 0.01. This is convenient. And here comes an extra trick: We can use integers to store these numbers - by storing the original value multiplied by a constant. Assuming we set aside 2 digits for the fractional part, the constant we will then need to multiply by is 100 (10^2). So, the number 47.63 will be represented - and stored - as an integer value of 4673. We can even use normal integer operations to do maths on fixed point numbers. They behave just like integers for addition, subtraction, multiplication and division. When we need to read out the actual value, we divide the fixed point number by the same constant we multiplied by earlier.
+
+Fixed point numbers is the industry standard way to handle the precision problem in triangle rasterization: We use a number representation that provides higher resolution than pure integers, but still gives exact results, and allows us to use fast integer operations for the calculations we need.
+
+But - what happened to the adjustment value? In a fixed point representation there is again such a thing as a smallest possible adjustment value. Our fixed point numbers have a a known resolution (that is constant across the entire value range), and that is exactly the value we want to adjust by. Just as in our old integer-based code. So things are now under control. But now, let us look some more at how we use this number representation.
+
+## Practicalities
+
+How do we create fixed point numbers? If we take a floating point number, multiply it by some integer value, and round off the result to an integer, we have made a fixed point representation of the original floating point number.
+
+The multiplication and rounding effectively subdivides the fractional part of the original number into a fixed set of values - ie we quantize the fractional part. This means that we cannot represent all values that a floating point number might have, but we do get the advantage that all mathematical operations on numbers can be realized by their integer variants. So within the available precision we choose for our fixed point numbers, the calculations will be fast and exact. And, as long as we multiply the input by a large enough number we will achieve enough resolution in the fractional part to reach the same animation smoothness as we had when using floating point numbers. At the same time, we still keep the correctness and speed we saw in the pure integer implementation. Put differently, we accept some (bounded) precision loss when converting to fixed point, in exchange for correct - and faster - calculations.
+
+The number we choose to multiply by should be some number 2^n. Then we can convert from a fixed point representation back to a normal number very efficiently. Instead of dividing by 2^n we can bit-shift the number n positions to the right. That is much much faster - but only works for division by 2^n.
+
+This is how bit shifting can replace division:
+
+<p align="center">
+<img src="images/7-bit-shift-fixed-point.png" width="75%">
+</p>
+
+When we bit-shift n places, we get the same result as division without rounding. This will also remove the fractional part of the number, so it is essentially a `trunc` or `floor` operation. If we need to support proper rounding we should add the value 0.5 (converted to fixed point representation) before bit-shifting.
+
+Now, which number 2^n would be right to use? A large number will give us high resolution in the fractional part, but take more space (more bits of storage). And we need to keep both the integer and fractional part within a number of bits that is easily supported by our hardware. Here we choose to use a 32-bit (signed) integer type. We must reserve one bit of storage for the sign (since we need to support negative numbers), so the total amount of bits we can spend on the integer and fractional parts are 31.
+
+If we assume the x and y screen coordinates will be inside the range 0..2048, the integer part would fit inside 11 bits (2^11 = 2048). However, when we calculate the determinant we multiply two fixed point numbers together, and to handle that properly we must set aside double that space. So we need 22 bits for the magnitude - and can spend up to 9 of the remaining bits for the fractional part.
+
+## Fixed point numbers, pixels and subpixels
+
+The structure of a fixed point number actually has some relation to the pixels we see on screen.
+
+It is here useful to introduce the concept of subpixels. Let's assume that each whole pixel we see on screen can be divided into smaller invisible parts, subpixels. The integer part of a fixed point screen coordinate lets us address a whole pixels, and the fractional part lets us address subpixels. So using fixed point coordinates lets us address each subpixel individually and exactly.
+
+This is how a pixel containing 64 subpixels looks like:
+
+<p align="center">
+<img src="images/7-pixels-and-subpixels.png" width="75%">
+</p>
+
+Another way to look at this is to imagine that we create a higher-resolution "invisible grid" of the screen, and perform exact integer calculations on that grid, all while keeping our drawing operations running on the normal pixel grid. In addition, all floating point coordinates undergo the exact same quantization step when they are converted to fixed point numbers. That means they will be snapped to their nearest subpixel location. This is the same type of pixel shifting we saw early on, when we rounded floating point numbers to integers, but now the magnitude of the shifts is much smaller, and it does not visibly affect the smoothness of the animation.
+
+## Code
+
+How smooth does the animation need to be? How many bits should we set aside for the fractional part? If you test some values, you will likely see that you get few noticeable improvements after spending more than 4 bits on the fractional part. So we have chosen that convention here. (The standard for GPUs nowadays seems to be 8 bits of subpixel resolution.)
+
+Choosing 4 bits means we multiply all incoming floating point numbers by 2^4 = 16 before rounding the result off to an integer, and then store that result in an integer variable. To get from a fixed point representation back to a normal number we shift the fixed point number right by 4 places. As mentioned, this conversion essentially is a truncation (a `floor` operation), so to do proper rounding we will need to add 0.5 (in fixed point representation, meaning, an integer value of 8) to the number before shifting to the right.
+
+In the application code, all of the fixed point operations we need for the rasterizer are implemented in the class `FixedPointVector`. We will not go through that code here. However, in the next section we will look at how we can convert the rasterizer to use this new and exciting number representation.
+
+# 8. Let's fix this
+
+(This article is part of a [series](#sections). You can jump to the [previous section](#7) or the [next section](#9) if you would like to.)
+
+In this section, we will convert the rasterizer to use fixed point coordinates. We have already implemented a `FixedPointVector` class to help us, so the walkthrough here only considers the changes to the application and to the rasterizer itself.
+
+When calculating the determinant we now refer to input vectors as `FixedPointVectors`. Apart from that, there are no changes - the two vector classes we use have the same API.
+
+```JavaScript
+getDeterminant(a, b, c) {
+    const ab = new FixedPointVector(b);
+    ab.sub(a);
+
+    const ac = new FixedPointVector(c);
+    ac.sub(a);
+
+    return ab[1] * ac[0] - ab[0] * ac[1];
+}
+```
+
+At the start of the triangle draw method, we convert the incoming floating point screen coordinates to fixed point coordinates by using the built-in constructor in `FixedPointVectors`:
+
+```JavaScript
+draw(screenCoordinates, color) {
+    // get screen coordinates for this triangle
+    const va = new FixedPointVector(screenCoordinates[this.va]);
+    const vb = new FixedPointVector(screenCoordinates[this.vb]);
+    const vc = new FixedPointVector(screenCoordinates[this.vc]);
+
+    const determinant = this.getDeterminant(va, vb, vc);
+
+    // backface culling: only draw if determinant is positive
+    // in that case, the triangle is ccw oriented - ie front-facing
+    if (determinant <= 0) {
+        return;
+    }
+
+    (...)
+```
+
+When we create the bounding box, we no longer have the `Math.floor()` and `Math.ceil()` functions avaiable, so we round the values up and down manually when we convert from fixed point numbers to normal integers:
+
+```JavaScript
+const xmin = Math.min(va[0], vb[0], vc[0]) >> FixedPointVector.SHIFT;
+const ymin = Math.min(va[1], vb[1], vc[1]) >> FixedPointVector.SHIFT;
+
+const xmax = (Math.max(va[0], vb[0], vc[0]) + FixedPointVector.DIVISION_CEILING) >> FixedPointVector.SHIFT;
+const ymax = (Math.max(va[1], vb[1], vc[1]) + FixedPointVector.DIVISION_CEILING) >> FixedPointVector.SHIFT;
+```
+
+Also, our `w` vector and the candidate point vector `p` need to change type:
+
+```JavaScript
+   // w = edge distances
+    const w = new FixedPointVector();
+
+    // p = screen coordinates
+    const p = new FixedPointVector();
+
+    for (let y = ymin; y <= ymax; y++) {
+      for (let x = xmin; x <= xmax; x++) {
+        // there is no need to round off the result.
+        // the input is an integer, and although we add 0.5 to it,
+        // we then multiply by 2^n (n>0), which means the result will always be an integer
+        p[0] = (x + 0.5) * FixedPointVector.MULTIPLIER;
+        p[1] = (y + 0.5) * FixedPointVector.MULTIPLIER;
+```
+
+The final part now is to update the fill rule to operate on fixed point numbers. Again, the APIs of the two vector classes are the same, so the change is very small.
+
+```JavaScript
+function isLeftOrTopEdge(start, end) {
+    const edge = new FixedPointVector(end);
+    edge.sub(start);
+    if (edge[1] > 0 || (edge[1] == 0 && edge[0] < 0)) return true;
+    return false;
+}
+```
+
+Regarding the fill rule, there is an important detail here: When we used integer coordinates in the rasterizer, the adjustment value was 1 - since that was the numerical resolution (ULP). Independent of our current use of fixed point coordinates, we still want the adjustment value to equal the resolution of the numeric representation. And that value is now 1 - _in fixed point representation_. So although the code does not seem to have changed, the meaning of the number 1 here has changed.
+
+```JavaScript
+if (isLeftOrTopEdge(vb, vc)) w[0]--;
+if (isLeftOrTopEdge(vc, va)) w[1]--;
+if (isLeftOrTopEdge(va, vb)) w[2]--;
+```
+
+And that is all that's needed in the rasterizer! Sweet! We now have a fully working and correct rasterizer that gives us smooth animation, due to subpixel resolution support.
+
+If you want to test out various subpixel resolutions and see the effects yourself, you can adjust the value of the `FixedPointVector.SHIFT` constant (see). Try out values like 0 (no subpixels - ie back to a pure-integer version), 1, 2, 4, and 8 for example.
+
+```JavaScript
+FixedPointVector.SHIFT = 4;
+```
+
+However, the code - as it is now - is not particularly fast. Let's add some simple timing code around the triangle draw function in the application code:
+
+```JavaScript
+let start = performance.now();
+greenTriangle.draw(rotatedVertices, greenColor);
+triangleDrawTime += performance.now() - start;
+
+if (frameCounter % 100 == 0) {
+    console.log(`Triangle time: ${(triangleDrawTime / frameCounter).toFixed(2)} ms`);
+}
+```
+
+When running the code on my machine, drawing the green triangle takes around 2.3 ms. That is actually quite a long time. Here, each triangle consists of only a few pixels (remember, the pixels we see on screen are very large) and does not require a lot of work to draw, but we still would not be able to draw and animate more than 7 triangles on screen before the movement would start stuttering. The browser draws 60 frames per second, so for everyting to run smoothly we must keep at least the same tempo. That means we have a budget of 16.7 ms per frame to draw and animate everything. And `7 triangles` times `2.3 ms per triangle` equals 16.1 ms, so 7 triangles will be the max.
+
+The profiler in my browser tells me that we spend a lot of time calculating determinants, evaluating the fill rule and instantiating `FixedPointVectors`. Could we speed up our code? Yes we can! In the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/9#readme) we will do just that.
+
+The [code for this section](8) and some [utility classes](lib) is also available.
+
+# 9. Time to go incremental
+
+(This article is the last part of a [series](#sections). You can jump to the [previous section](#8) if you would like to.)
+
+In this section we will improve the performance of the rasterizer. We would like to draw our triangles much faster so we can show and animate a lot more triangles at the same time. Hopefully we can do this without making the code much more complicated or harder to read.
+
+One way to optimize code for performance is to look for blocks of code that are executed many times, and see if there is a way to change the work that happens there into something that will run faster. We can also try to redistribute work - so that tasks that are executed many times are moved to a place where they need to happen fewer times. Of course, the total computation must be kept unchanged so the program works as before.
+
+The plan here is to restructure the work so the heavy, time-consuming calculations happen once per triangle draw call. Also, we will make the calculations that have to happen once per pixel run as quickly as possible.
+
+## Going incremental
+
+Right now, we calculate one determinant and evaluate one fill rule per edge, per pixel, inside the enclosing bounding box. That is, we calculate everything from scratch for each pixel and do not reuse any of the previous calculations.
+
+A common optimization trick is to try to calculate things incrementally. That means to start by performing an initial and heavy calculation once, and then to update the result as needed with small (lighter) changes.
+Whether this trick improves the performance or not depends on whether the small changes can be calculated easily.
+
+It turns out we can apply this trick here. We can do the full determinant and fill rule calculation for just one pixel, and then apply the change - when going from one pixel to the next - on top of the previous result.
+
+<p align="center">
+<img src="images/9-incremental.png" width="75%">
+</p>
+
+In this situation, we are lucky, since if you do the math (which we won't here) the change in determinant value per pixel - both horizontally and vertically - is constant. The math might be understood intuitively if you recall that the determinant value is proportional to the shortest distance from a candidate pixel to a triangle edge. That means the change only depends of the slope of the triangle edge - and as long as both the triangle edges and the scan directions are straight lines the change is constant.
+
+<p align="center">
+<img src="images/9-constant-change.png" width="75%">
+</p>
+
+The change also easily calculated. That means that we can update the current (running) determinant value very quickly.
+
+This is how we change the code:
+
+```JavaScript
+// screen coordinates at the starting point (top left corner of bounding box, at pixel center)
+const topLeft = new FixedPointVector(xmin + 0.5, ymin + 0.5, 0);
+
+// calculate edge distances at starting point
+const wLeft = new FixedPointVector();
+wLeft[0] = this.getDeterminant(vb, vc, topLeft);
+wLeft[1] = this.getDeterminant(vc, va, topLeft);
+wLeft[2] = this.getDeterminant(va, vb, topLeft);
+
+if (isLeftOrTopEdge(vb, vc)) wLeft[0]--;
+if (isLeftOrTopEdge(vc, va)) wLeft[1]--;
+if (isLeftOrTopEdge(va, vb)) wLeft[2]--;
+```
+
+We use the top left corner of the bounding box as the starting point. We then calculate the three determinants for that pixel, and put the result in the `wLeft` variable. We also calculate the fill rule adjustment for this pixel.
+
+Since the adjustments are constant across entire triangle edges, we can calculate all determinants for the first pixel, apply the adjustments, and then all the consecutive pixels that we are going to draw inside the bounding box will already have been adjusted. So we only need to evaluate the fill rule once. The incremental calculations take place on top of the initial adjustment.
+
+We now calculate the change in determinant values when moving from one pixel to the next, both horizontally (`dwdx`) and vertically (`dwdy`). As you can see, finding the change per pixel is a very lightweight operation:
+
+```JavaScript
+const dwdx = new FixedPointVector();
+dwdx[0] = (vb[1] - vc[1]) << FixedPointVector.SHIFT;
+dwdx[1] = (vc[1] - va[1]) << FixedPointVector.SHIFT;
+dwdx[2] = (va[1] - vb[1]) << FixedPointVector.SHIFT;
+
+const dwdy = new FixedPointVector();
+dwdy[0] = (vb[0] - vc[0]) << FixedPointVector.SHIFT;
+dwdy[1] = (vc[0] - va[0]) << FixedPointVector.SHIFT;
+dwdy[2] = (va[0] - vb[0]) << FixedPointVector.SHIFT;
+```
+
+We are now mostly ready. For each new horizontal line in the triangle, we use the current `wLeft` value as a starting point, and copy that value over to `w` - which contains the final determinant value at a given pixel location. Then, for each pixel `x` we add `dxdw` onto `w`. (Here, we actually subtract - due to the way we calculated the change. We could also have calculated a value with the opposite sign, and used addition instead.) As we jump to the next horizontal line, we then add `dwdy` to the `wLeft` value, and then we are ready for the next loop iteration.
+
+```JavaScript
+// hold final w values here
+const w = new FixedPointVector();
+
+for (let y = ymin; y <= ymax; y++) {
+    w.copy(wLeft);
+
+    for (let x = xmin; x <= xmax; x++) {
+        if ((w[0] | w[1] | w[2]) >= 0) {
+            this.buffer.data[imageOffset + 0] = color[0];
+            this.buffer.data[imageOffset + 1] = color[1];
+            this.buffer.data[imageOffset + 2] = color[2];
+            this.buffer.data[imageOffset + 3] = 255;
+        }
+        imageOffset += 4;
+        w.sub(dwdx);
+    }
+    imageOffset += imageStride;
+    wLeft.add(dwdy);
+}
+```
+
+Here, we have also rephrased the expression for evaluating `w`: The values in `w` are now integers and we can bitwise OR the three components together before testing whether the resulting value is larger than, or equal to, zero. This reduces the probability of branch misprediction, something that can be very time-consuming on modern CPUs.
+
+Looking at the code now, we see that the innermost loop only consists of copying values from one variable to another - or adding/subtracting values. There is no obvious way to further simplify how we evaluate `w` for each pixel. Also note that we take care to instantiate all objects before we enter the loops that draw pixels. This way we don't need to spend time allocating (or garbage collecting) memory, and the overhead of memory management in the inner loops is eliminated.
+
+We now call it a day. Drawing a single triangle takes 0.23 ms on my machine. That is 10% of the time the previous version needed! We have achieved a 10x speedup by rephrasing our calculations so that we get the needed results incrementally - instead of from scratch - for each pixel.
+
+The result is a fast, smooth and correct triangle rasterizer. Not bad!
+
+The [code for this section](9) and [utility classes](lib) are also available.
+
+[EPILOGUE]
