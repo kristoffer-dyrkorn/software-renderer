@@ -14,8 +14,6 @@ However, on a computer screen we cannot draw lines directly, instead we need to 
 
 This tutorial is structured as follows: First, you will get to know the principles behind triangle rasterization and more details about the approach we will be using. Then we will write code that will become a simple, first version of a rasterizer. Then we will gradually refine it as we see needs for improvements. The final section in this tutorial looks at performance optimizations - and as you will see, the changes we make there will give a 10-time increase in speed.
 
-Enjoy!
-
 ## Sections
 
 1. [A walkthrough of the method](#1-a-walkthrough-of-the-method)
@@ -27,6 +25,8 @@ Enjoy!
 7. [One solution, but two new problems](#7-one-solution-but-two-new-problems)
 8. [Let's fix this](#8-lets-fix-this)
 9. [Time to go incremental](#9-time-to-go-incremental)
+
+Enjoy!
 
 # 1. A walkthrough of the method
 
@@ -184,7 +184,7 @@ The canvas element object - that we can access from JavaScript - also has an arr
 <img src="images/2-array-values.png" width="75%">
 </p>
 
-To draw a pixel at a specific (x, y) location on screen, we need to convert the x and y values to an array index that then will point to the right location in the array. The correct value is `4 * (y * width + x)`. The multiplication by 4 is needed since we address bytes, and there are 4 byte values per pixel. At this array location we can then start writing byte values - red, green, blue and transparency values. The minimum value we can write is 0 (no intensity) and the maximum is 255 (full intensity). The resulting color of the pixel will be a mix of the three color intensities and the transparency. In this tutorial we will not use transparency, so we write a value of 255 - which means a completely opaque pixel.
+To draw a pixel at a specific (x, y) location on screen, we need to convert the x and y values to an array index that then will point to the right location in the array. The correct value is `4 * (y * width + x)`. The multiplication by 4 is needed since we address bytes, and there are 4 byte values per pixel. At this array location we can then start writing byte values after each other - red, green, blue and transparency values. The minimum value we can write is 0 (no intensity) and the maximum is 255 (full intensity). The resulting color of the pixel will be a mix of the three color intensities and the transparency. In this tutorial we will not use transparency, so we write a value of 255 - which means a completely opaque pixel.
 
 Note: In the canvas coordinate system, (0, 0) is the top left pixel. The x-axis goes to the right, and the y-axis goes downwards. This is how the array addressing looks like if each pixel consisted of one byte:
 
@@ -335,7 +335,7 @@ Now - the result looks like this:
 <img src="images/3-first-triangle.png" width="75%">
 </p>
 
-And with that, we have our first, basic, rasterizer up and running! Go to the next section to see how we are going refine it.
+And with that, we have our first, basic, rasterizer up and running! We will now start refining it.
 
 The [code for this section](3) and some [utility classes](lib) is also available.
 
@@ -343,7 +343,7 @@ The [code for this section](3) and some [utility classes](lib) is also available
 
 (This article is part of a [series](#sections). You can jump to the [previous section](#3-the-first-basic-rasterizer) or the [next section](#5-weve-got-to-move-it) if you would like to.)
 
-In this section, we will take a closer look at what happens when we draw two triangles that share an edge. There are some important details that need to be resolved.
+In this section, we will take a closer look at what happens when we draw two triangles that share an edge. There are some important details here that need to be resolved.
 
 ## The application code
 
@@ -435,7 +435,7 @@ if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
 
 The rest of the code remains the same.
 
-And with that, we can safely draw lots of triangles - without gaps or overlaps! But, we are not done yet. Go to the next section to see what happens when we start animating the triangles.
+And with that, we can safely draw lots of triangles - without gaps or overlaps! But, we are not done yet. We will now start animating the triangles.
 
 The [code for this section](4) and some [utility classes](lib) is also available.
 
@@ -505,7 +505,7 @@ We are now ready to inspect the results. Not bad - the triangles are indeed rota
 <img src="images/5-integer-rotate.gif" width="75%">
 </p>
 
-This can be improved, check out the next section!
+This can be improved! We will have a look at that in the next section.
 
 The [code for this section](5) and some [utility classes](lib) is also available.
 
@@ -626,7 +626,7 @@ Here is the result - the two triangles now rotate smoothly. This looks good!
 <img src="images/6-floating-point-rotate-glitch.gif" width="75%">
 </p>
 
-But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!
+But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? We will figure out that next.
 
 The [code for this section](6) and some [utility classes](lib) is also available.
 
@@ -719,6 +719,8 @@ How smooth does the animation need to be? How many bits should we set aside for 
 Choosing 4 bits means we multiply all incoming floating point numbers by 2^4 = 16 before rounding the result off to an integer, and then store that result in an integer variable. To get from a fixed point representation back to a normal number we shift the fixed point number right by 4 places. As mentioned, this conversion essentially is a truncation (a `floor` operation), so to do proper rounding we will need to add 0.5 (in fixed point representation, meaning, an integer value of 8) to the number before shifting to the right.
 
 In the application code, all of the fixed point operations we need for the rasterizer are implemented in the class `FixedPointVector`. We will not go through that code here. However, in the next section we will look at how we can convert the rasterizer to use this new and exciting number representation.
+
+There is no code for this section but there will be code for the next one.
 
 # 8. Let's fix this
 
