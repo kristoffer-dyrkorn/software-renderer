@@ -216,7 +216,7 @@ ctx.putImageData(screenBuffer, 0, 0);
 
 And with that, we have all we need to start drawing triangles in the browser! Let's do that in the next section.
 
-The [code for this section](2) and some [utility classes](lib) is also available.
+In the mean time, you might want to look at [the code for this section](2) and some [utility classes](lib).
 
 # 3. The first, basic rasterizer
 
@@ -337,7 +337,7 @@ Now - the result looks like this:
 
 And with that, we have our first, basic, rasterizer up and running! We will now start refining it.
 
-The [code for this section](3) and some [utility classes](lib) is also available.
+In the mean time, you might want to look at [the code for this section](3) and some [utility classes](lib).
 
 # 4. Moar triangles, moar problems
 
@@ -437,7 +437,7 @@ The rest of the code remains the same.
 
 And with that, we can safely draw lots of triangles - without gaps or overlaps! But, we are not done yet. We will now start animating the triangles.
 
-The [code for this section](4) and some [utility classes](lib) is also available.
+In the mean time, you might want to look at [the code for this section](4) and some [utility classes](lib).
 
 # 5. We've got to move it
 
@@ -507,7 +507,7 @@ We are now ready to inspect the results. Not bad - the triangles are indeed rota
 
 This can be improved! We will have a look at that in the next section.
 
-The [code for this section](5) and some [utility classes](lib) is also available.
+In the mean time, you might want to look at [the code for this section](5) and some [utility classes](lib).
 
 # 6. Let's go continuous!
 
@@ -584,11 +584,13 @@ This means that pixel edges lie at integer coordinates, and that pixel centers a
 <img src="images/6-pixel-centers.png" width="75%">
 </p>
 
-When we now draw a triangle, we loop through all coordinates inside our integer bounding box, and calculate the determinant value at pixel centers, ie at integer coordinates where we have added 0.5 along both axes. So the triangles will need to cover those points for a pixel to be drawn. (The illustration only shows candidate points near the right triangle edge.)
+When we now draw a triangle, we loop through all coordinates inside our integer bounding box, and calculate the determinant value at pixel centers, ie at integer coordinates where we have added 0.5 along both axes. So the triangle will need to cover those points for pixels to be drawn. (The illustration here only shows candidate points near the right triangle edge.)
 
 <p align="center">
 <img src="images/6-determinant-pixel-center.png" width="75%">
 </p>
+
+The code looks like this:
 
 ```JavaScript
 for (let y = ymin; y < ymax; y++) {
@@ -628,7 +630,7 @@ Here is the result - the two triangles now rotate smoothly. This looks good!
 
 But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? We will figure out that next.
 
-The [code for this section](6) and some [utility classes](lib) is also available.
+In the mean time, you might want to look at [the code for this section](6) and some [utility classes](lib).
 
 # 7. One solution, but two new problems
 
@@ -720,7 +722,7 @@ Choosing 4 bits means we multiply all incoming floating point numbers by 2^4 = 1
 
 In the application code, all of the fixed point operations we need for the rasterizer are implemented in the class `FixedPointVector`. We will not go through that code here. However, in the next section we will look at how we can convert the rasterizer to use this new and exciting number representation.
 
-There is no code for this section but there will be code for the next one.
+There is no code for this section but I promise: There will be code for the next one.
 
 # 8. Let's fix this
 
@@ -933,6 +935,6 @@ We now call it a day. Drawing a single triangle takes 0.23 ms on my machine. Tha
 
 The result is a fast, smooth and correct triangle rasterizer. Not bad!
 
-The [code for this section](9) and [utility classes](lib) are also available.
+Here you can look at the final version [of the code](9) and the [utility classes](lib).
 
-[EPILOGUE]
+# 10. Epilogue
