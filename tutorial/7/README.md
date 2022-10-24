@@ -14,13 +14,17 @@ As an example, let's create a toy floating point format that follows the same st
 
 Let's set aside 3 decimal digits to store the numberic value. As in the floating point standard, the total number of digits is fixed, but the decimal can be placed anywhere between the digits. If we ignore negative numbers, the smallest possible value we can represent is 0. The next larger values are 0.01, 0.02, 0.03 and so on. That is, we have a resolution of 0.01. At a value of 9.99 the next larger value becomes 10.0, and after that the next numbers are 10.1, 10.2 and 10.3. So, the resolution has become 0.1. After 99.9 comes 100, and then we are at integer resolution - all the way up to the maximum value of 999.
 
-![](../images/7-floating-point-numbers.png)
+<p align="center">
+<img src="../images/7-floating-point-numbers.png" width="75%">
+</p>
 
 So - the smallest possible value we can use when nudging our determinant will depend on the value of the determinant itself! That sounds a bit complicated, but is an artifact of the floating point representation (the IEEE 754 standard). In numerics, this smallest difference - which we have called resolution here - is called ULP (Unit of Least Precision).
 
 Also, as long as we use floating point numbers only some numbers along the number line can be represented exactly. The rest will be nudged to the nearest available value. Here is an example of representable numbers in a low-precision floating point format. An ULP is the gap between two short tick marks.
 
-![](../images/7-ulps.png)
+<p align="center">
+<img src="../images/7-ulps.png" width="75%">
+</p>
 
 Since the size of an ULP varies, we will have varying degrees of exactness in number representations when using floating point. As an example, see for yourself what the answer to 0.1 + 0.2 is in JavaScript (which is the language we have used here). Although JavaScript uses double precision (64 bits) when handling numbers, that is still not sufficient. Also, the answer has nothing to do with JavaScript itself - this is due to floating point numbers, and to expected by any language that follows IEEE 754 correctly.
 
@@ -50,7 +54,9 @@ The number we choose to multiply by should be some number 2^n. Then we can conve
 
 This is how bit shifting can replace division:
 
-![](../images/7-bit-shift-fixed-point.png)
+<p align="center">
+<img src="../images/7-bit-shift-fixed-point.png" width="75%">
+</p>
 
 When we bit-shift n places, we get the same result as division without rounding. This will also remove the fractional part of the number, so it is essentially a `trunc` or `floor` operation. If we need to support proper rounding we should add the value 0.5 (converted to fixed point representation) before bit-shifting.
 
@@ -66,7 +72,9 @@ It is here useful to introduce the concept of subpixels. Let's assume that each 
 
 This is how a pixel containing 64 subpixels looks like:
 
-![](../images/7-pixels-and-subpixels.png)
+<p align="center">
+<img src="../images/7-pixels-and-subpixels.png" width="75%">
+</p>
 
 Another way to look at this is to imagine that we create a higher-resolution "invisible grid" of the screen, and perform exact integer calculations on that grid, all while keeping our drawing operations running on the normal pixel grid. In addition, all floating point coordinates undergo the exact same quantization step when they are converted to fixed point numbers. That means they will be snapped to their nearest subpixel location. This is the same type of pixel shifting we saw early on, when we rounded floating point numbers to integers, but now the magnitude of the shifts is much smaller, and it does not visibly affect the smoothness of the animation.
 

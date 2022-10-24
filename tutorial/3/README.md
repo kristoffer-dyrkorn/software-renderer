@@ -109,6 +109,8 @@ We store the determinant values in a vector `w`. If all three `w` components are
 
 Now - the result looks like this:
 
-![](../images/3-first-triangle.png)
+<p align="center">
+<img src="../images/3-first-triangle.png" width="75%">
+</p>
 
 And with that, we have our first, basic, rasterizer up and running! Go to the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/4#readme) to see how we are going refine it.

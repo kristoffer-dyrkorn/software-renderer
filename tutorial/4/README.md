@@ -27,13 +27,17 @@ We add another vertex to the array of all vertices, and create a new, separate v
 
 This is how it looks like:
 
-![](../images/4-two-triangles.png)
+<p align="center">
+<img src="../images/4-two-triangles.png" width="75%">
+</p>
 
 ## Oooops
 
 At first, this seems to look just great. But, if we draw first the green triangle, and then the blue one, we will see that there are some blue pixels that are drawn on top of the green ones.
 
-![](../images/4-overdraw.gif)
+<p align="center">
+<img src="../images/4-overdraw.png" width="75%">
+</p>
 
 This is called overdraw - and it is something we want to avoid. First of all, it will worsen performance, since we spend time drawing pixels that later become hidden by other pixels. Also, the visual quality will suffer: It will make edges between triangles seem to move, depending on which triangle was drawn first. Should we want to use the rasterizer to draw detailed 3D objects with many triangles, we will in general have no control over the sequence the triangles will be drawn in. The result will look awful - the edges will flicker.
 
@@ -43,7 +47,9 @@ You might remember from earlier that we considered all pixels lying exactly on a
 
 We need to sort out that - and introduce another rule for triangles. The rule that most graphics APIs use, is to say that pixels that lie exactly on a left side edge of a triangle, or on a flat top edge of a triangle, do not belong to that triangle. This is sufficient to cover all cases of shared edges - and make all pixels belong to just one triangle.
 
-![](../images/4-top-left-edge.png)
+<p align="center">
+<img src="../images/4-top-left-edge.png" width="75%">
+</p>
 
 The rule is often called the "top left" fill rule, and can be implemented like this, in the triangle rasterizer:
 
