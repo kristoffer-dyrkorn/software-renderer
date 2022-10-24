@@ -1,5 +1,7 @@
 # Setting up the browser to draw pixels
 
+(This article is part of a [series](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial#sections). Also see the [previous section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme).)
+
 In this section we will use the `<canvas>` element to draw individual pixels on the screen. This will set the stage for drawing actual triangles - which we will go through in the section after this one.
 
 ## The drawing surface

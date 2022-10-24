@@ -1,5 +1,7 @@
 # Time to go incremental
 
+(This article is part of a [series](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial#sections). Also see the [previous section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/8#readme).)
+
 In this section we will improve the performance of the rasterizer. We would like to draw our triangles much faster so we can show and animate a lot more triangles at the same time. Hopefully we can do this without making the code much more complicated or harder to read.
 
 One way to optimize code for performance is to look for blocks of code that are executed many times, and see if there is a way to change the work that happens there into something that will run faster. We can also try to redistribute work - so that tasks that are executed many times are moved to a place where they need to happen fewer times. Of course, the total computation must be kept unchanged so the program works as before.

@@ -1,5 +1,7 @@
 # Moar triangles, moar problems
 
+(This article is part of a [series](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial#sections). Also see the [previous section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/3#readme).)
+
 In this section, we will take a closer look at what happens when we draw two triangles that share an edge. There are some important details that need to be resolved.
 
 ## The application code

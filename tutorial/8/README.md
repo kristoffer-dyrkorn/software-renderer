@@ -1,5 +1,7 @@
 # Let's fix this
 
+(This article is part of a [series](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial#sections). Also see the [previous section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/7#readme).)
+
 In this section, we will convert the rasterizer to use fixed point coordinates. We have already implemented a `FixedPointVector` class to help us, so the walkthrough here only considers the changes to the application and to the rasterizer itself.
 
 When calculating the determinant we now refer to input vectors as `FixedPointVectors`. Apart from that, there are no changes - the two vector classes we use have the same API.

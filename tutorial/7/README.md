@@ -1,5 +1,7 @@
 # One solution, but two new problems
 
+(This article is part of a [series](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial#sections). Also see the [previous section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/6#readme).)
+
 ## Floating-point numbers
 
 The rasterizer runs on floating point numbers, and uses the rotated vertex coordinates as input for the determinant calculations.
@@ -30,7 +32,7 @@ Since the size of an ULP varies, we will have varying degrees of exactness in nu
 
 We also hit upon another difficulty: The calculation of the determinant value itself will not necessarily be correct. The resolution we will get will be higher than when using integer values, but the mathematical operations we use to calculate determinants (subtraction and multiplication) are lossy in the floating point domain: Subtractions can incur information loss (due to [catastrophic cancellation](https://en.wikipedia.org/wiki/Catastrophic_cancellation)), and multiplications will scale up errors. This means that the calculated determinant value likely will deviate from what you would get when using pen and paper. It even turns out that determinant calculations are especially tricky to handle (see for example [this article](https://observablehq.com/@mourner/non-robust-arithmetic-as-art)).
 
-So, here we have two problems: The determinant values themselves will be imprecise, and at the same time we don't know what a suitable adjustment value will be. We need to ensure separation for the tie-breaker rule to work correctly, but here both the base results and the adjustments are uncertain.
+So, here we have two problems: The determinant values themselves will be imprecise, and at the same time we don't know what a suitable adjustment value will be. We need to ensure separation for the tie-breaker rule to work correctly, but here the base results as well as the adjustments are uncertain.
 
 Fortunately, we don't have to solve the problems. Instead, we can use a different representation of our vertex coordinates and determinant values. We can use what is called fixed point numbers. And then, seemingly by magic, both problems disappear!
 

@@ -1,5 +1,7 @@
 # We've got to move it
 
+(This article is part of a [series](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial#sections). Also see the [previous section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/4#readme).)
+
 In this section, we will start animating our triangles - we will make them rotate on the screen!
 
 ## The application code
