@@ -19,14 +19,14 @@ Enjoy!
 ## Sections
 
 1. [A walkthrough of the method](#1-a-walkthrough-of-the-method)
-1. [Setting up the browser to draw pixels](#2-setting-up-the-browser-to-draw-pixels)
-1. [The first, basic rasterizer](#3-the-first-basic-rasterizer)
-1. [Moar triangles, moar problems](#4-moar-triangles-moar-problems)
-1. [We've got to move it](#5-weve-got-to-move-it)
-1. [Let's go continuous!](#6-lets-go-continuous)
-1. [One solution, but two new problems](#7-one-solution-but-two-new-problems)
-1. [Let's fix this](#8-lets-fix-this)
-1. [Time to go incremental](#9-time-to-go-incremental)
+2. [Setting up the browser to draw pixels](#2-setting-up-the-browser-to-draw-pixels)
+3. [The first, basic rasterizer](#3-the-first-basic-rasterizer)
+4. [Moar triangles, moar problems](#4-moar-triangles-moar-problems)
+5. [We've got to move it](#5-weve-got-to-move-it)
+6. [Let's go continuous!](#6-lets-go-continuous)
+7. [One solution, but two new problems](#7-one-solution-but-two-new-problems)
+8. [Let's fix this](#8-lets-fix-this)
+9. [Time to go incremental](#9-time-to-go-incremental)
 
 # 1. A walkthrough of the method
 
