@@ -376,10 +376,10 @@ This is how it looks like:
 
 ## Oooops
 
-At first, this seems to look just great. But, if we draw first the green triangle, and then the blue one, we will see that there are some blue pixels that are drawn on top of the green ones.
+At first, this seems to look just great. But, if we draw first the green triangle, and then the blue one, and zoom in on this, we will see that there are some blue pixels that are drawn on top of the green ones.
 
 <p align="center">
-<img src="images/4-overdraw.png" width="75%">
+<img src="images/4-overdraw.gif" width="75%">
 </p>
 
 This is called overdraw - and it is something we want to avoid. First of all, it will worsen performance, since we spend time drawing pixels that later become hidden by other pixels. Also, the visual quality will suffer: It will make edges between triangles seem to move, depending on which triangle was drawn first. Should we want to use the rasterizer to draw detailed 3D objects with many triangles, we will in general have no control over the sequence the triangles will be drawn in. The result will look awful - the edges will flicker.
@@ -502,7 +502,7 @@ We use the `requestAnimationFrame` method to synchronise the drawing and rotatio
 We are now ready to inspect the results. Not bad - the triangles are indeed rotating, but notice: The movement is not smooth - the triangles seem to jump around a bit as they rotate.
 
 <p align="center">
-<img src="images/5-integer-rotate.png" width="75%">
+<img src="images/5-integer-rotate.gif" width="75%">
 </p>
 
 This can be improved, check out the next section!
@@ -623,7 +623,7 @@ To summarize: We keep the input vertex coordinates as they are (floating point v
 Here is the result - the two triangles now rotate smoothly. This looks good!
 
 <p align="center">
-<img src="images/6-floating-point-rotate-glitch.png" width="75%">
+<img src="images/6-floating-point-rotate-glitch.gif" width="75%">
 </p>
 
 But wait - there is something wrong here: Now and then there are white single-pixel gaps along the edge between the triangles. The fill rule is correct and we do use floating point numbers (with double precision, even). What is wrong? Read all about it in the next section!
@@ -829,7 +829,7 @@ if (frameCounter % 100 == 0) {
 
 When running the code on my machine, drawing the green triangle takes around 2.3 ms. That is actually quite a long time. Here, each triangle consists of only a few pixels (remember, the pixels we see on screen are very large) and does not require a lot of work to draw, but we still would not be able to draw and animate more than 7 triangles on screen before the movement would start stuttering. The browser draws 60 frames per second, so for everyting to run smoothly we must keep at least the same tempo. That means we have a budget of 16.7 ms per frame to draw and animate everything. And `7 triangles` times `2.3 ms per triangle` equals 16.1 ms, so 7 triangles will be the max.
 
-The profiler in my browser tells me that we spend a lot of time calculating determinants, evaluating the fill rule and instantiating `FixedPointVectors`. Could we speed up our code? Yes we can! In the [next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/9#readme) we will do just that.
+The profiler in my browser tells me that we spend a lot of time calculating determinants, evaluating the fill rule and instantiating `FixedPointVectors`. Could we speed up our code? Yes we can! In the next section we will do just that.
 
 The [code for this section](8) and some [utility classes](lib) is also available.
 
@@ -856,13 +856,13 @@ It turns out we can apply this trick here. We can do the full determinant and fi
 <img src="images/9-incremental.png" width="75%">
 </p>
 
-In this situation, we are lucky, since if you do the math (which we won't here) the change in determinant value per pixel - both horizontally and vertically - is constant. The math might be understood intuitively if you recall that the determinant value is proportional to the shortest distance from a candidate pixel to a triangle edge. That means the change only depends of the slope of the triangle edge - and as long as both the triangle edges and the scan directions are straight lines the change is constant.
+In this situation, we are lucky, since if you do the math (which we won't here) the change in determinant value per pixel - both horizontally and vertically - is constant. The math might be understood intuitively if you recall that the determinant value is proportional to the shortest distance from a candidate pixel to a triangle edge. That means the change in value only depends of the slope of the triangle edge - and as long as both the triangle edges and the scan directions are straight lines the change is constant.
 
 <p align="center">
 <img src="images/9-constant-change.png" width="75%">
 </p>
 
-The change also easily calculated. That means that we can update the current (running) determinant value very quickly.
+The change is also easy to calculate. That means that we can update the current (running) determinant value very quickly.
 
 This is how we change the code:
 
