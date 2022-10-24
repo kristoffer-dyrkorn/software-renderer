@@ -18,8 +18,8 @@ Enjoy!
 
 ## Sections
 
-1. [A walkthrough of the method](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme)
-1. [Setting up the browser to draw pixels](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/2#readme)
+1. [A walkthrough of the method](#1-a-walkthrough-of-the-method)
+1. [Setting up the browser to draw pixels](#2-setting-up-the-browser-to-draw-pixels)
 1. [The first, basic rasterizer](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/3#readme)
 1. [Moar triangles, moar problems](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/4#readme)
 1. [We've got to move it](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/5#readme)
@@ -30,7 +30,7 @@ Enjoy!
 
 # 1. A walkthrough of the method
 
-(This article is part of a [series](#sections). Also see the [previous section](#readme).)
+(This article is part of a [series](#sections). You can jump to the [previous section](#readme) or the [next section](#2-setting-up-the-browser-to-draw-pixels) if you would like to.)
 
 In this section, you will get to know the principles behind the rasterization method we will use.
 
@@ -139,7 +139,7 @@ The code here draws pixels - something we have not explained yet. Don't worry, w
 
 # 2. Setting up the browser to draw pixels
 
-(This article is part of a [series](#sections). Also see the [previous section](#1-a-walkthrough-of-the-method).)
+(This article is part of a [series](#sections). You can jump to the [previous section](#1-a-walkthrough-of-the-method) or the [next section](#2-setting-up-the-browser-to-draw-pixels) if you would like to.)
 
 In this section we will use the `<canvas>` element to draw individual pixels on the screen. This will set the stage for drawing actual triangles - which we will go through in the section after this one.
 
@@ -216,4 +216,223 @@ ctx.putImageData(screenBuffer, 0, 0);
 
 And with that, we have all we need to start drawing triangles in the browser! Let's do that in the next section.
 
-In the mean time, here is the [code for this section](2)
+In the mean time, here is the [code for this section](2).
+
+# 3. The first, basic rasterizer
+
+(This article is part of a [series](#sections). You can jump to the [previous section](#2-setting-up-the-browser-to-draw-pixels) or the [next section](#4) if you would like to.)
+
+In this section, we will _finally_ get to draw a triangle on the screen - using the method we have described in section 1 and the setup code from section 2.
+
+## The application code
+
+Let's get started. Take a look at this code:
+
+```JavaScript
+const vertices = [];
+vertices.push(new Vector(140, 100, 0));
+vertices.push(new Vector(140, 40, 0));
+vertices.push(new Vector(80, 40, 0));
+
+const greenTriangleIndices = [0, 1, 2];
+const greenTriangle = new Triangle(greenTriangleIndices, screenBuffer);
+
+const color = new Vector(120, 240, 100);
+
+greenTriangle.draw(vertices, color);
+```
+
+Here, we create an array of vertex coordinates for three vertices in a triangle, define indices to those vertices, instantiate a `Triangle` object, define a triangle color by its red, green and blue values, and then draw the triangle using the vertex coordinate array and the specified color.
+
+This code relies on the same `Vector` class that we mentioned earlier. We use that for coordinates, colors and other numbers that need to be grouped together.
+
+Note that we set the vertex indices in the constructor, and keep the vertex coordinates in an array by themselves. This way the vertices can be moved around on screen without impacting the basic structure of a triangle - ie which vertices it contains. (We will return to this subject later when we will start animating our triangles.)
+
+Also see that the vertices are specified in counterclockwise order, as mentioned in the first section.
+
+## The triangle code
+
+Let's have a look at the start of the triangle drawing method - ie the actual rasterizer:
+
+```JavaScript
+draw(screenCoordinates, color) {
+    // get screen coordinates for this triangle
+    const va = screenCoordinates[this.va];
+    const vb = screenCoordinates[this.vb];
+    const vc = screenCoordinates[this.vc];
+
+    const determinant = this.getDeterminant(va, vb, vc);
+
+    // backface culling: only draw if determinant is positive
+    // in that case, the triangle is ccw oriented - ie front-facing
+    if (determinant <= 0) {
+        return;
+    }
+
+    (...)
+
+```
+
+The first step is to read out the actual vertex coordinates from the array provided in the parameter, using the indices originally set in the constructor. We name the three vertices `va`, `vb` and `vc`. They are three-dimensional `Vector`s, ie having x, y and z coordinates. (For now we will not use the z coordinates)
+
+We then check the winding order of the triangle vertices. For our rasterizer to work correctly, the vertices must be provided in counter-clockwise order. We use the determinant function to verify this, and only draw the triangle if the determinant value is positive. (If the determinant is zero then the triangle has zero area, and can be skipped).
+
+The next step is to find the minimum and maximum coordinates for the vertices. These form the corner coordinates of the bounding box enclosing the triangle. We also calculate the index in the pixel buffer that points to the pixel at the upper left corner of the bounding box, and the stride (change in index value) when going from one pixel in the buffer to the pixel directly below.
+
+Then we define two `Vector`s, one to hold a variable `w` (that will be explained shortly) and one to hold the variable `p` which contains the x- and y-coordinates of the current candidate pixel.
+
+```JavaScript
+    const xmin = Math.min(va[0], vb[0], vc[0]) - 1;
+    const ymin = Math.min(va[1], vb[1], vc[1]) - 1;
+
+    const xmax = Math.max(va[0], vb[0], vc[0]) + 1;
+    const ymax = Math.max(va[1], vb[1], vc[1]) + 1;
+
+    let imageOffset = 4 * (ymin * this.buffer.width + xmin);
+
+    // stride: change in raster buffer offsets from one line to next
+    const imageStride = 4 * (this.buffer.width - (xmax - xmin));
+
+    // w = edge distances
+    const w = new Vector();
+
+    // p = screen coordinates
+    const p = new Vector();
+```
+
+The code that follow looks like this:
+
+```JavaScript
+    for (let y = ymin; y < ymax; y++) {
+        for (let x = xmin; x < xmax; x++) {
+            p[0] = x;
+            p[1] = y;
+
+            w[0] = this.getDeterminant(vb, vc, p);
+            w[1] = this.getDeterminant(vc, va, p);
+            w[2] = this.getDeterminant(va, vb, p);
+
+            if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
+                this.buffer.data[imageOffset + 0] = color[0];
+                this.buffer.data[imageOffset + 1] = color[1];
+                this.buffer.data[imageOffset + 2] = color[2];
+                this.buffer.data[imageOffset + 3] = 255;
+            }
+            imageOffset += 4;
+        }
+        imageOffset += imageStride;
+    }
+}
+```
+
+We are now at the heart of the rasterizer. We loop through all pixels inside the bounding box and calculate three different determinants, each of them based on two of the triangle vertices plus the current pixel.
+
+We store the determinant values in a vector `w`. If all three `w` components are larger than - or equal to - zero, the pixel will belong to the triangle, and we write RGB and transparency values (as mentioned, the a transparency value of 255 means "not transparent") to the specified offsets in the pixel buffer - before updating the offsets so they keep pointing to the right screen locations when running through the two loops.
+
+Now - the result looks like this:
+
+<p align="center">
+<img src="../images/3-first-triangle.png" width="75%">
+</p>
+
+And with that, we have our first, basic, rasterizer up and running! Go to the next section to see how we are going refine it.
+
+In the mean time, here is the [code for this section](3).
+
+# 4. Moar triangles, moar problems
+
+(This article is part of a [series](#sections). You can jump to the [previous section](#1-a-walkthrough-of-the-method) or the [next section](#2-setting-up-the-browser-to-draw-pixels) if you would like to.)
+
+In this section, we will take a closer look at what happens when we draw two triangles that share an edge. There are some important details that need to be resolved.
+
+## The application code
+
+It is not so interesting to look at just one triangle on a screen. We need more triangles! So, let's add a blue one. In the application code, it looks like this:
+
+```JavaScript
+const vertices = [];
+vertices.push(new Vector(140, 100, 0));
+vertices.push(new Vector(140, 40, 0));
+vertices.push(new Vector(80, 40, 0));
+vertices.push(new Vector(50, 90, 0));
+
+const greenTriangleIndices = [0, 1, 2];
+const greenTriangle = new Triangle(greenTriangleIndices, screenBuffer);
+
+const blueTriangleIndices = [0, 2, 3];
+const blueTriangle = new Triangle(blueTriangleIndices, screenBuffer);
+
+const greenColor = new Vector(120, 240, 100);
+const blueColor = new Vector(100, 180, 240);
+```
+
+We add another vertex to the array of all vertices, and create a new, separate vertex index array just for the blue triangle. Note that the indices `2` and `0` are shared between the two triangles. This means that the two triangles share an edge - that goes between vertices number 2 and 0.
+
+This is how it looks like:
+
+<p align="center">
+<img src="../images/4-two-triangles.png" width="75%">
+</p>
+
+## Oooops
+
+At first, this seems to look just great. But, if we draw first the green triangle, and then the blue one, we will see that there are some blue pixels that are drawn on top of the green ones.
+
+<p align="center">
+<img src="../images/4-overdraw.png" width="75%">
+</p>
+
+This is called overdraw - and it is something we want to avoid. First of all, it will worsen performance, since we spend time drawing pixels that later become hidden by other pixels. Also, the visual quality will suffer: It will make edges between triangles seem to move, depending on which triangle was drawn first. Should we want to use the rasterizer to draw detailed 3D objects with many triangles, we will in general have no control over the sequence the triangles will be drawn in. The result will look awful - the edges will flicker.
+
+You might remember from earlier that we considered all pixels lying exactly on a triangle edge (`w` = 0) to belong to the triangle. What we have here is an unfortunate consequence of that: The pixels along the shared edge between two triangles now belong to both triangles. So they are drawn twice.
+
+## One rule to rule them all
+
+We need to sort out that - and introduce another rule for triangles. The rule that most graphics APIs use, is to say that pixels that lie exactly on a left side edge of a triangle, or on a flat top edge of a triangle, do not belong to that triangle. This is sufficient to cover all cases of shared edges - and make all pixels belong to just one triangle.
+
+<p align="center">
+<img src="../images/4-top-left-edge.png" width="75%">
+</p>
+
+The rule is often called the "top left" fill rule, and can be implemented like this, in the triangle rasterizer:
+
+```JavaScript
+function isLeftOrTopEdge(start, end) {
+    const edge = new Vector(end);
+    edge.sub(start);
+    if (edge[1] > 0 || (edge[1] == 0 && edge[0] < 0)) return true;
+}
+```
+
+The logic behind is as follows: An edge is a left edge if the change in y coordinate, when moving from the end and to the start of the edge, is larger than zero. An edge is a flat top edge if the change in y coordinate is zero and the change in x is negative.
+
+This way of expressing the fill rule is based on two conventions we already follow in our setup: That the vertices in a visible triangle have counterclockwise order, and that the positive y axis on screen points down. As long as those two hold, then the code will work as intended.
+
+(Side note: We could have chosen the opposite convention, and defined a "bottom right" rule, and that would be just as correct. The point is to have a rule that consistently separates pixels that lie on shared edges, and the "top left" version of this rule has somehow become the standard in computer graphics.)
+
+Now that we have defined the rule, what do we do with it? How do we express that the pixels on the edges that match the rule do not belong to this triangle?
+
+When drawing pixels, we need to make an exception: We will skip those pixels that - according to this new rule - don't belong to the triangle after all. An easy way to do so is to adjust the determinant value. So, whenever an edge is affected by the fill rule (ie is a left edge or a horizontal top edge), we subtract some small amount from that determinant.
+
+This could be considered a dirty trick - since reducing a determinant value essentially moves a triangle edge towards the triangle center. So the adjustment should be as small as possible, while still large enough to work as intended.
+
+The goal here is to make the determinant value for _this_ edge, in the current triangle, differ from the determinant value for pixels on the same edge in the _neighbour_ triangle. This way we create a tie breaking rule - ie some logic that ensures that pixels lying exactly on the shared edge will end up belonging to only one of the triangles - and are thus drawn only once.
+
+How large should the adjustment be? In the setup we have here, all coordinates have integer values. This means that all determinants also have integer values. The resolution - or, smallest expressible value - of the determinant calculation is 1 and that, in turn, means that the smallest possible adjustment value is 1.
+
+```JavaScript
+if (isLeftOrTopEdge(vb, vc)) w[0]--;
+if (isLeftOrTopEdge(vc, va)) w[1]--;
+if (isLeftOrTopEdge(va, vb)) w[2]--;
+
+if (w[0] >= 0 && w[1] >= 0 && w[2] >= 0) {
+    this.buffer.data[imageOffset + 0] = color[0];
+    this.buffer.data[imageOffset + 1] = color[1];
+    this.buffer.data[imageOffset + 2] = color[2];
+    this.buffer.data[imageOffset + 3] = 255;
+}
+```
+
+The rest of the code remains the same.
+
+And with that, we can safely draw lots of triangles - without gaps or overlaps! But, we are not done yet. Go to [the next section](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/5#readme) to see what happens when we start animating the triangles.
