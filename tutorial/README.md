@@ -20,13 +20,13 @@ Enjoy!
 
 1. [A walkthrough of the method](#1-a-walkthrough-of-the-method)
 1. [Setting up the browser to draw pixels](#2-setting-up-the-browser-to-draw-pixels)
-1. [The first, basic rasterizer](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/3#readme)
-1. [Moar triangles, moar problems](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/4#readme)
-1. [We've got to move it](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/5#readme)
-1. [Let's go continuous!](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/6#readme)
-1. [One solution, but two new problems](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/7#readme)
-1. [Let's fix this](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/8#readme)
-1. [Time to go incremental](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/9#readme)
+1. [The first, basic rasterizer](#3-the-first-basic-rasterizer)
+1. [Moar triangles, moar problems](#4-moar-triangles-moar-problems)
+1. [We've got to move it](#5-weve-got-to-move-it)
+1. [Let's go continuous!](#6-lets-go-continuous)
+1. [One solution, but two new problems](#7-one-solution-but-two-new-problems)
+1. [Let's fix this](#8-lets-fix-this)
+1. [Time to go incremental](#9-time-to-go-incremental)
 
 # 1. A walkthrough of the method
 
@@ -441,7 +441,7 @@ The [code for this section](4) and some [utility classes](lib) is also available
 
 # 5. We've got to move it
 
-(This article is part of a [series](#sections). You can jump to the [previous section](#4-moar-triangles-moar-problems) or the [next section](#6) if you would like to.)
+(This article is part of a [series](#sections). You can jump to the [previous section](#4-moar-triangles-moar-problems) or the [next section](#6-lets-go-continuous) if you would like to.)
 
 In this section, we will start animating our triangles - we will make them rotate on the screen!
 
@@ -511,7 +511,7 @@ The [code for this section](5) and some [utility classes](lib) is also available
 
 # 6. Let's go continuous!
 
-(This article is part of a [series](#sections). You can jump to the [previous section](#5-weve-got-to-move-it) or the [next section](#7) if you would like to.)
+(This article is part of a [series](#sections). You can jump to the [previous section](#5-weve-got-to-move-it) or the [next section](#7-one-solution-but-two-new-problems) if you would like to.)
 
 In this section, we will improve the smoothness of the animation.
 
@@ -632,7 +632,7 @@ The [code for this section](6) and some [utility classes](lib) is also available
 
 # 7. One solution, but two new problems
 
-(This article is part of a [series](#sections). You can jump to the [previous section](#6) or the [next section](#8) if you would like to.)
+(This article is part of a [series](#sections). You can jump to the [previous section](#6-lets-go-continuous) or the [next section](#8-lets-fix-this) if you would like to.)
 
 ## Floating-point numbers
 
@@ -722,7 +722,7 @@ In the application code, all of the fixed point operations we need for the raste
 
 # 8. Let's fix this
 
-(This article is part of a [series](#sections). You can jump to the [previous section](#7) or the [next section](#9) if you would like to.)
+(This article is part of a [series](#sections). You can jump to the [previous section](#7-one-solution-but-two-new-problems) or the [next section](#9-time-to-go-incremental) if you would like to.)
 
 In this section, we will convert the rasterizer to use fixed point coordinates. We have already implemented a `FixedPointVector` class to help us, so the walkthrough here only considers the changes to the application and to the rasterizer itself.
 
@@ -835,7 +835,7 @@ The [code for this section](8) and some [utility classes](lib) is also available
 
 # 9. Time to go incremental
 
-(This article is the last part of a [series](#sections). You can jump to the [previous section](#8) if you would like to.)
+(This article is the last part of a [series](#sections). You can jump to the [previous section](#8-lets-fix-this) if you would like to.)
 
 In this section we will improve the performance of the rasterizer. We would like to draw our triangles much faster so we can show and animate a lot more triangles at the same time. Hopefully we can do this without making the code much more complicated or harder to read.
 
