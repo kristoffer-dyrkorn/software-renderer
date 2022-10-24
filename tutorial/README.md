@@ -18,9 +18,7 @@ Enjoy!
 
 ## Sections
 
-1. <a href="https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme">A walkthrough of the method</a>
-
-1. [A walkthrough of the method](1#readme)
+1. <a href="https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/1#readme" target=_self>A walkthrough of the method</a>
 1. [Setting up the browser to draw pixels](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/2#readme)
 1. [The first, basic rasterizer](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/3#readme)
 1. [Moar triangles, moar problems](https://github.com/kristoffer-dyrkorn/software-renderer/tree/main/tutorial/4#readme)
