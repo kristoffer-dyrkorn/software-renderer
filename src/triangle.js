@@ -107,32 +107,43 @@ export default class Triangle {
     // is stored in the w coordinate. (The clip space and screen space transforms don't change it.)
     // we reverse the sign to convert from a distance to a coordinate (as the camera is placed in origo)
 
-    // compute inverse z coordinates for each vertex, and do linear interpolation on the inverse values,
+    // compute inverse z coordinates for each vertex, and do linear interpolation on the values,
     // and then compute inverse again (ie get the "actual value") when it is needed.
-    // this way we get perspective correct z interpolation since 1/z is linear
-    // perspective correct z values are needed for correct texture mapping
+    // this way we get perspective correct z interpolation - since 1/z is linear.
+    // perspective correct z values are needed for correct texture mapping.
     const zInverted = new Vector(1 / -va[3], 1 / -vb[3], 1 / -vc[3]);
 
-    // pre-multiply inverted z values at the vertices by 1 / determinant (1 / normalization factor)
-    // so that this multiply will not be needed when calculating each interpolated 1/z value - ie when dotting
-    // the inverted z values at the vertices with the *scaled* barycentric coordinates.
-    // thus we are saving one multiply per pixel
+    // pre-multiply inverted z values at the vertices by 1 / determinant
+    // so that this multiply is not needed when calculating each interpolated 1/z value
+    // (ie when we are dotting inverted z values from vertices with the weights, which are *scaled* barycentric coordinates)
+    // thus we save one multiply per pixel
     zInverted.scale(invDeterminant);
 
-    // use projected z values for each vertex. the projection matrix setup defines
-    // the z range, and the chosen matrix values maximise the numerical precision.
-    // the range of the projected z value is 1 (near plane) to 0 (far plane, at infinity)
+    // use projected z values for each vertex for the z buffer calculations.
+    // the projection matrix setup defines the z range, and the matrix values chosen there
+    // maximise the numerical precision. the range of the projected z value is
+    // 1 (near plane) to 0 (far plane, at infinity)
     // see https://developer.nvidia.com/content/depth-precision-visualized
     const projectedZ = new Vector(va[2], vb[2], vc[2]);
+
+    // use projected z for z buffer calculations.
+    // in the fill loop we use scaled barycentric weights (pre-multipled by determinant value)
+    // so pre-multiply here by the inverse - so the resulting values are correct
+    // TODO consider other ways of calculating z buffer values - skipping/shifting pre-multiplication,
+    // or adding constants dxdz and dydz per pixel
+    // TODO consider removing the scaling here, it should not be needed for the z buffer operation
+    // and might reduce precision
     projectedZ.scale(invDeterminant);
 
     // texture x- and y-coordinates for each vertex, scaled by the corresponding inverse z value
+    // and by texture size. the last scaling is to convert from uv range (0..1) to raster coordinate range
     const sDivZ = new Vector(
       textureCoordinates[this.ta][0],
       textureCoordinates[this.tb][0],
       textureCoordinates[this.tc][0]
     );
     sDivZ.multiply(zInverted);
+    sDivZ.scale(255); // texture size of 256 pixels in x direction
 
     const tDivZ = new Vector(
       textureCoordinates[this.ta][1],
@@ -140,6 +151,7 @@ export default class Triangle {
       textureCoordinates[this.tc][1]
     );
     tDivZ.multiply(zInverted);
+    tDivZ.scale(255); // texture size of 256 pixels in y direction
 
     // x, y, z components of each vertex normal, scaled by the corresponding inverse z value
     const nxDivZ = new Vector(
@@ -170,7 +182,9 @@ export default class Triangle {
     const stride = screenBuffer.width - (xmax - xmin);
     const imageStride = 4 * stride;
 
-    let nWeight = 0.7;
+    //    let nWeight = 0.7;
+    let nWeight = -this.lightDirection.dot(normalCoordinates[this.na]);
+    if (nWeight < 0) nWeight = 0;
 
     for (let y = ymin; y < ymax; y++) {
       this.w.copy(this.wLeft);
@@ -188,75 +202,32 @@ export default class Triangle {
             zBuffer[zBufferOffset] = zValue;
 
             // interpolate the normal vector (based on vertex normals)
-            // since we normalize the normal vector before using it in the lighting calculation
-            // we can skip the otherwise needed scaling of each component by camera space z value.
-            // thus, only the sign of z matters, which here always will be negative
-            // since camera looks down negative z from origo
-            this.n[0] = -nxDivZ.dot(this.w);
-            this.n[1] = -nyDivZ.dot(this.w);
-            this.n[2] = -nzDivZ.dot(this.w);
-            this.n.normalize();
-            nWeight = -this.n.dot(this.lightDirection);
-            if (nWeight < 0) nWeight = 0;
+            // since we normalize the normal vector in the next step (before using it in the lighting calculation)
+            // we can skip the otherwise needed scaling of each vector component by camera space z value
+            // thus, only the sign (and not the magnitude) of z matters. the sign will always will be negative
+            // since camera is placed in origo and looks down negative z, and the object is placed in negative z space
+            //            this.n[0] = -nxDivZ.dot(this.w);
+            //            this.n[1] = -nyDivZ.dot(this.w);
+            //            this.n[2] = -nzDivZ.dot(this.w);
+            //            this.n.normalize();
+            // TODO find approximation to normal interpolation and subsequent normalizing
 
-            // get interpolated 1/z value (based on the 1/z values at each vertex) for this point in the triangle
+            //            nWeight = -this.n.dot(this.lightDirection);
+            //            if (nWeight < 0) nWeight = 0;
+
+            // get interpolated 1/z value (based on each of the vertex 1/z values) for this point in the triangle
             const interpolatedZInverted = zInverted.dot(this.w);
-            // get actual, perspective correct z value
+            // get perspective corrected z value - to use in uv interpolation
             const perspectiveZ = 1 / interpolatedZInverted;
 
-            // get linearly interpolated s/z and t/z values for this point in the triangle
-            // then multiply by perspective correct z to get s and t values
+            // calculate s/z and t/z values for this point in the triangle, using linear interpolation
+            // then multiply by perspective correct z to get actual s and t values
             const s = sDivZ.dot(this.w) * perspectiveZ;
             const t = tDivZ.dot(this.w) * perspectiveZ;
 
-            // TODO put perspectiveZ outside parenthesis?
-            /*
-
-y = t: tDivZ.dot(this.w) 
-x = s: sDivZ.dot(this.w)
-
-width * y + x
-
-----
-
-width * y + x:
-
-width * (fx + gy + hz)
-+ ax + by + cz
-
-7 muls
-
-x * (a + f * width) + y * (b + g * width) + z * (c + h * width)
-
-6 muls
-
-put perspective z at the end to save another mul
-
-perspectiveZ * (x * (a + f * width) + y * (b + g * width) + z * (c + h * width))
-
-
-            index = trunc(3 * perspectiveZ * 255 * (t * width + s))
-
-<< does trunc!
-
-3.3 << 2 = 12!
-
-(but how is the performance?)
-
-Use |0 for conversion to integers
-use Math.imul(a,b) for multiplication (see MDN)
-
-http://speakingjs.com/es5/ch11.html#integers
-
-
-*/
-            // scale and truncate texture coordinates to get raster coordinates and look up pixel value
-            // TODO: Premultiply texture coordinates with texture image dimensions-1 to avoid multiplies here
-            const tx = Math.trunc(s * 255);
-            const ty = Math.trunc(t * 255);
+            const tx = Math.trunc(s);
+            const ty = Math.trunc(t);
             const index = 3 * ((ty << 8) + tx);
-
-            //const index = 0;
 
             buffer[imageOffset + 0] = textureMap[index] * nWeight;
             buffer[imageOffset + 1] = textureMap[index + 1] * nWeight;
